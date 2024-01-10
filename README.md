@@ -1,3 +1,4 @@
+# WIP: Trying to refactor with Avalonia to enable AOT support in order to run normally on Linux
 
 # Genshin Impact FPS Unlocker
  - This tool helps you to unlock the 60 fps limit in the game
