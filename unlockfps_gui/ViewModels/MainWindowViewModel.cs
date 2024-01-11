@@ -2,49 +2,39 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
+using UnlockFps.Gui.Model;
 using UnlockFps.Gui.Views;
 
 namespace UnlockFps.Gui.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private int _fps = 120;
     public int MinimumFps { get; set; } = 1;
     public int MaximumFps { get; set; } = 420;
-
-    public int Fps
-    {
-        get => _fps;
-        set => SetField(ref _fps, value);
-    }
+    public Config Config { get; set; } = null!;
 
     public ICommand OpenInitializationWindowCommand { get; } = ReactiveCommand.Create(() =>
     {
-        var window = new InitializationWindow
-        {
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        };
+        var window = App.DefaultServices.GetRequiredService<InitializationWindow>();
+        window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         window.ShowDialog(((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!)
             .MainWindow!);
     });
 
     public ICommand OpenSettingsWindowCommand { get; } = ReactiveCommand.Create(() =>
     {
-        var window = new SettingsWindow()
-        {
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        };
+        var window = App.DefaultServices.GetRequiredService<SettingsWindow>();
+        window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         window.ShowDialog(((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!)
             .MainWindow!);
     });
 
     public ICommand OpenAboutWindowCommand { get; } = ReactiveCommand.Create(() =>
     {
-        var window = new AboutWindow()
-        {
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        };
+        var window = App.DefaultServices.GetRequiredService<AboutWindow>();
+        window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         window.ShowDialog(((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!)
             .MainWindow!);
     });
