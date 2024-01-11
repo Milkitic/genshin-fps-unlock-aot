@@ -1,0 +1,110 @@
+<Window
+    x:Class="UnlockFps.Gui.Views.SettingsWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Settings"
+    Width="410"
+    Height="425"
+    CanResize="False"
+    Icon="/Assets/icon.ico"
+    mc:Ignorable="d">
+    <Grid Margin="10" RowDefinitions="Auto,*">
+        <Label Content="All settings will be saved automatically" FontWeight="SemiBold" />
+        <TabControl Grid.Row="1" SelectedIndex="2">
+            <TabItem Header="General">
+                <StackPanel>
+                    <ToggleSwitch OffContent="Start Minimized (Unlocker)" OnContent="Start minimized (Unlocker)" />
+                    <ToggleSwitch OffContent="Auto Close" OnContent="Auto Close" />
+                    <ToggleSwitch OffContent="Power saving" OnContent="Power saving" />
+                    <Grid Margin="0,10" ColumnDefinitions="Auto,*">
+                        <Label Content="Game Process Priority: " />
+                        <ComboBox
+                            Grid.Column="1"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Stretch">
+                            <ComboBoxItem>Below Normal</ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Launch Options">
+                <StackPanel>
+                    <ToggleSwitch OffContent="Borderless Window" OnContent="Borderless Window" />
+                    <ToggleSwitch OffContent="Fullscreen" OnContent="Fullscreen" />
+                    <ToggleSwitch OffContent="Custom Resolution" OnContent="Custom Resolution" />
+                    <ToggleSwitch OffContent="Use Mobile UI" OnContent="Use Mobile UI" />
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Content="Resolution: " />
+                        <Grid
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="5,10,0,10"
+                            HorizontalAlignment="Stretch"
+                            ColumnDefinitions="*,Auto,*">
+                            <NumericUpDown Value="1920" />
+                            <Label
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Content="×" />
+                            <NumericUpDown Grid.Column="2" Value="1080" />
+                        </Grid>
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Content="Fullscreen Mode: " />
+                        <ComboBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="5,10,0,10"
+                            HorizontalAlignment="Stretch">
+                            <ComboBoxItem>Borderless</ComboBoxItem>
+                        </ComboBox>
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Content="Monitor: " />
+                        <NumericUpDown
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="5,10,0,10"
+                            HorizontalAlignment="Stretch" />
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="DLLs">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
+                    <Label Grid.ColumnSpan="2"  Content="DLLs will be injected in the order of this list" />
+                    <ListBox
+                        Grid.Row="1" 
+                        BorderBrush="{DynamicResource TextControlBorderBrush}"
+                        Grid.Column="0"
+                        Margin="0,12,0,0"
+                        BorderThickness="1">
+                        <ListBoxItem>test</ListBoxItem>
+                    </ListBox>
+                    <StackPanel
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="15,12,0,0">
+                        <Button HorizontalAlignment="Stretch" Content="Add" />
+                        <Button
+                            Margin="0,15,0,0"
+                            HorizontalAlignment="Stretch"
+                            Content="Remove" />
+                        <ToggleSwitch OffContent="Suspend Load" OnContent="Suspend Load" />
+
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

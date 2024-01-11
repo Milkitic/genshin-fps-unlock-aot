@@ -1,0 +1,44 @@
+<Window
+    x:Class="UnlockFps.Gui.Views.AboutWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="About"
+    Width="390"
+    CanResize="False"
+    Icon="/Assets/icon.ico"
+    SizeToContent="Height"
+    mc:Ignorable="d">
+    <Border Margin="15">
+        <TextBlock TextAlignment="Center" TextWrapping="Wrap">
+            <Run Text="Genshin FPS Unlocker" />
+            <LineBreak />
+            <Run Text="v xx" />
+            <LineBreak />
+
+            <Run Text="Forked version based on:" />
+            <TextBlock
+                Classes="link"
+                Tapped="HyperLink_OnTapped"
+                Text="https://github.com/34736384/genshin-fps-unlock" />
+
+            <LineBreak />
+            <LineBreak />
+            <Run Text="This program is free and open source:" />
+            <TextBlock
+                Classes="link"
+                Tapped="HyperLink_OnTapped"
+                Text="https://github.com/Milkitic/genshin-fps-unlock-aot" />
+            <LineBreak />
+            <LineBreak />
+            <Run Text="If you encounter any problems or have a suggestion, go ahead and submit an issue at" />
+            <LineBreak />
+            <TextBlock
+                Classes="link"
+                Tapped="HyperLink_OnTapped"
+                Text="https://github.com/Milkitic/genshin-fps-unlock-aot/issues"
+                TextWrapping="Wrap" />
+        </TextBlock>
+    </Border>
+</Window>

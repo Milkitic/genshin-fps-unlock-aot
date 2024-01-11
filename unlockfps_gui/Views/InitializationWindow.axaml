@@ -1,0 +1,38 @@
+<Window
+    x:Class="UnlockFps.Gui.Views.InitializationWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Initialization"
+    Width="475"
+    CanResize="False"
+    Icon="/Assets/icon.ico"
+    SizeToContent="Height"
+    mc:Ignorable="d">
+    <StackPanel Margin="12">
+        <Label Content="Current Path:" />
+        <Label Content="" />
+        <Label Content="Searching..." Foreground="Orange" />
+        <Label Content="Select" />
+        <ComboBox
+            Width="NaN"
+            Margin="3"
+            HorizontalAlignment="Stretch" />
+        <Label Margin="0,5">
+            <TextBlock>
+                <Run>If your game is not listed above, you can either:</Run>
+                <LineBreak />
+                <Run>1. Open the game now and the unlocker will try to find its location</Run>
+                <LineBreak />
+                <Run>2. Use the browse button below</Run>
+            </TextBlock>
+        </Label>
+        <DockPanel Margin="3">
+            <Panel DockPanel.Dock="Bottom">
+                <Button Content="Browse..." />
+                <Button HorizontalAlignment="Right" Content="Confirm" />
+            </Panel>
+        </DockPanel>
+    </StackPanel>
+</Window>

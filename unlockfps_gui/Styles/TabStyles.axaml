@@ -1,0 +1,86 @@
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <StackPanel Spacing="20">
+                <TabItem Header="Leaf" />
+                <TabItem Header="Arch" IsSelected="True" />
+                <TabItem Background="Yellow" Header="Background" />
+                <Border Width="400">
+                    <TabControl>
+
+                        <TabItem>
+                            <TabItem.Header>
+                                <StackPanel Background="Transparent" Orientation="Horizontal">
+                                    <TextBlock Text="Arch" />
+                                </StackPanel>
+                            </TabItem.Header>
+                            <Border Height="100" Background="AntiqueWhite">
+                                <TextBlock
+                                    FontSize="20"
+                                    Foreground="Black"
+                                    Text="Content" />
+                            </Border>
+                        </TabItem>
+                        <TabItem Header="Leaf">
+                            <Border Height="100" Background="Green" />
+                        </TabItem>
+                        <TabItem Header="Disabled" IsEnabled="False" />
+                    </TabControl>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <Styles.Resources>
+        <ControlTheme x:Key="{x:Type TabControl}" TargetType="TabControl">
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="{DynamicResource TabItemMargin}" />
+            <Setter Property="Background" Value="{DynamicResource TabControlBackground}" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border
+                        HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <DockPanel>
+                            <Grid ColumnDefinitions="*,Auto" DockPanel.Dock="{TemplateBinding TabStripPlacement}">
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                    <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                                </ScrollViewer>
+                            </Grid>
+                            <ContentPresenter
+                                Name="PART_SelectedContentHost"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding SelectedContent}"
+                                ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^[ItemCount=0] /template/ Button#AddButton">
+                <Setter Property="Margin" Value="0,10,10,0" />
+            </Style>
+        </ControlTheme>
+
+        <ControlTheme
+            x:Key="{x:Type TabItem}"
+            BasedOn="{StaticResource {x:Type TabItem}}"
+            TargetType="TabItem">
+            <Style Selector="^:selected">
+                <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+            </Style>
+        </ControlTheme>
+
+        <system:Double x:Key="TabItemHeaderFontSize">14</system:Double>
+        <FontWeight x:Key="TabItemHeaderThemeFontWeight">Normal</FontWeight>
+
+    </Styles.Resources>
+</Styles>

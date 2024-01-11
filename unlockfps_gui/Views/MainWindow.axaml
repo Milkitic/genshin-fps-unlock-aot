@@ -1,0 +1,61 @@
+<Window
+    x:Class="UnlockFps.Gui.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:UnlockFps.Gui.ViewModels"
+    Title="Genshin FPS Unlocker"
+    Width="320"
+    x:DataType="vm:MainWindowViewModel"
+    CanResize="False"
+    Icon="/Assets/icon.ico"
+    SizeToContent="Height"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*">
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_Options">
+                    <MenuItem Command="{Binding OpenSettingsWindowCommand}" Header="_Settings" />
+                    <MenuItem Command="{Binding OpenInitializationWindowCommand}" Header="_Initialization" />
+                    <Separator />
+                    <MenuItem Command="{Binding OpenAboutWindowCommand}" Header="_About" />
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <StackPanel Grid.Row="1" Margin="15,10">
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock VerticalAlignment="Center" Text="FPS: " />
+                <NumericUpDown
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    FormatString="0"
+                    Increment="5"
+                    Maximum="{Binding MaximumFps}"
+                    Minimum="{Binding MinimumFps}"
+                    Text="FPS"
+                    Value="{Binding Fps}" />
+            </Grid>
+            <Slider
+                Maximum="{Binding MaximumFps}"
+                Minimum="{Binding MinimumFps}"
+                Value="{Binding Fps}" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <ToggleSwitch
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    OffContent="Start game automatically"
+                    OnContent="Start game automatically" />
+                <Button Grid.Column="1" Content="Start" />
+            </Grid>
+        </StackPanel>
+    </Grid>
+
+</Window>

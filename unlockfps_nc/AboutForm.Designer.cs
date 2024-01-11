@@ -37,18 +37,18 @@
             // LabelTitle
             // 
             LabelTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            LabelTitle.Location = new Point(12, 9);
+            LabelTitle.Location = new Point(12, 10);
             LabelTitle.Name = "LabelTitle";
-            LabelTitle.Size = new Size(320, 36);
+            LabelTitle.Size = new Size(320, 41);
             LabelTitle.TabIndex = 0;
             LabelTitle.Text = "Genshin FPS Unlocker\r\nv3.0.3";
             LabelTitle.TextAlign = ContentAlignment.TopCenter;
             // 
             // LabelDescription
             // 
-            LabelDescription.Location = new Point(12, 45);
+            LabelDescription.Location = new Point(12, 51);
             LabelDescription.Name = "LabelDescription";
-            LabelDescription.Size = new Size(320, 20);
+            LabelDescription.Size = new Size(320, 23);
             LabelDescription.TabIndex = 1;
             LabelDescription.Text = "This program is free and open source";
             LabelDescription.TextAlign = ContentAlignment.MiddleCenter;
@@ -56,9 +56,9 @@
             // LinkLabelSource
             // 
             LinkLabelSource.LinkArea = new LinkArea(8, 46);
-            LinkLabelSource.Location = new Point(12, 65);
+            LinkLabelSource.Location = new Point(12, 74);
             LinkLabelSource.Name = "LinkLabelSource";
-            LinkLabelSource.Size = new Size(320, 20);
+            LinkLabelSource.Size = new Size(320, 23);
             LinkLabelSource.TabIndex = 2;
             LinkLabelSource.TabStop = true;
             LinkLabelSource.Text = "Source: https://github.com/34736384/genshin-fps-unlock";
@@ -69,9 +69,9 @@
             // LinkLabelIssues
             // 
             LinkLabelIssues.LinkArea = new LinkArea(84, 53);
-            LinkLabelIssues.Location = new Point(12, 85);
+            LinkLabelIssues.Location = new Point(12, 96);
             LinkLabelIssues.Name = "LinkLabelIssues";
-            LinkLabelIssues.Size = new Size(320, 67);
+            LinkLabelIssues.Size = new Size(320, 76);
             LinkLabelIssues.TabIndex = 3;
             LinkLabelIssues.TabStop = true;
             LinkLabelIssues.Text = "If you encounter any problems or have a suggestion\r\nGo ahead and submit an issue at\r\n\r\nhttps://github.com/34736384/genshin-fps-unlock/issues\r\n\r\n";
@@ -81,9 +81,9 @@
             // 
             // AboutForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(344, 171);
+            ClientSize = new Size(344, 194);
             Controls.Add(LinkLabelIssues);
             Controls.Add(LinkLabelSource);
             Controls.Add(LabelDescription);

@@ -1,0 +1,31 @@
+<Application
+    x:Class="UnlockFps.Gui.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
+    RequestedThemeVariant="Default">
+    <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
+
+    <Application.Styles>
+        <styling:FluentAvaloniaTheme
+            CustomAccentColor="DodgerBlue"
+            PreferSystemTheme="True"
+            PreferUserAccentColor="True"
+            UseSystemFontOnWindows="True" />
+        <StyleInclude Source="avares://unlockfps/Styles/TabStyles.axaml" />
+        <Styles>
+            <Style Selector="Window.tool_window Panel#PART_MinimiseButton">
+                <Setter Property="IsVisible" Value="False" />
+            </Style>
+            <Style Selector="Window.tool_window Panel#PART_RestoreButton">
+                <Setter Property="IsVisible" Value="False" />
+            </Style>
+        </Styles>
+        <Style Selector="TextBlock.link">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+            <Setter Property="TextDecorations" Value="Underline" />
+        </Style>
+    </Application.Styles>
+
+</Application>
