@@ -26,7 +26,6 @@ public static class AppBuilderExtensions
             {
                 Console.Error.WriteLine("Cannot find default font.");
             }
-
         }
 
         if (familyName != null)

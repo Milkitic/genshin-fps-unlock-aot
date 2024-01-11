@@ -13,17 +13,15 @@ internal sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        using var mutex = new Mutex(true, @"GenshinFPSUnlocker", out var createdNew);
-#if !DEBUG
-        if (!createdNew)
+        using (new Mutex(true, @"GenshinFPSUnlocker", out var createdNew))
         {
-            return;
+            DuplicatedInstance = !createdNew;
+            BuildAvaloniaApp()
+                .StartWithClassicDesktopLifetime(args);
         }
-#endif
-
-        BuildAvaloniaApp()
-            .StartWithClassicDesktopLifetime(args);
     }
+
+    public static bool DuplicatedInstance { get; private set; }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()

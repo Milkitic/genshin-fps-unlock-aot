@@ -17,10 +17,17 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            if (!Program.DuplicatedInstance)
             {
-                DataContext = new MainWindowViewModel(),
-            };
+                desktop.MainWindow = new MainWindow
+                {
+                    DataContext = new MainWindowViewModel(),
+                };
+            }
+            else
+            {
+                desktop.MainWindow = new AlertWindow();
+            }
         }
 
         base.OnFrameworkInitializationCompleted();

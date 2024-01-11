@@ -1,0 +1,39 @@
+<Window
+    x:Class="UnlockFps.Gui.Views.AlertWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Error"
+    CanResize="False"
+    Icon="/Assets/icon.ico"
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <Grid Margin="15" RowDefinitions="Auto,Auto">
+        <StackPanel Margin="15,20" Orientation="Horizontal">
+            <Border VerticalAlignment="Top">
+                <TextBlock
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="32"
+                    Text="&#xEB90;">
+                    <TextBlock.Foreground>
+                        <LinearGradientBrush>
+                            <GradientStop Offset="0" Color="#FF2323" />
+                            <GradientStop Offset="1" Color="#cc3232" />
+                        </LinearGradientBrush>
+                    </TextBlock.Foreground>
+                </TextBlock>
+            </Border>
+            <TextBlock
+                Margin="10,0,0,0"
+                VerticalAlignment="Center"
+                Text="Another unlocker is already running." />
+        </StackPanel>
+        <Button
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            Click="Button_OnClick"
+            Content="OK" />
+    </Grid>
+</Window>
