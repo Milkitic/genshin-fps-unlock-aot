@@ -66,14 +66,16 @@ public static class WindowChromeExtensions
         {
             if (version is OSVersionExtension.OperatingSystem.Windows11)
             {
-                window.Background = isDark ? null : SolidColorBrush.Parse("#F3F3F3");
+                window.Background = isDark
+                    ? SolidColorBrush.Parse("#80202020")
+                    : SolidColorBrush.Parse("#DDF3F3F3");
                 window.TransparencyLevelHint = new[] { WindowTransparencyLevel.Mica };
             }
             else if (version is OSVersionExtension.OperatingSystem.Windows10)
             {
                 window.Background = isDark
-                    ? SolidColorBrush.Parse("#18202020")
-                    : SolidColorBrush.Parse("#F3F3F3");
+                    ? SolidColorBrush.Parse("#80202020")
+                    : SolidColorBrush.Parse("#DDF3F3F3");
                 window.TransparencyLevelHint = new[] { WindowTransparencyLevel.AcrylicBlur };
             }
         }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnlockFps.Gui.Model;
@@ -15,7 +17,7 @@ public class ConfigService
     public ConfigService()
     {
         Load();
-        ClampValues();
+        StandardizeValues();
     }
 
     private void Load()
@@ -27,13 +29,28 @@ public class ConfigService
         Config = JsonSerializer.Deserialize(json, ConfigJsonContext.Default.Config)!;
     }
 
-    private void ClampValues()
+    private void StandardizeValues()
     {
+        if (!string.IsNullOrWhiteSpace(Config.GamePath))
+        {
+            Config.GamePath = File.Exists(Config.GamePath) ? Path.GetFullPath(Config.GamePath) : null;
+        }
+
         Config.FPSTarget = Math.Clamp(Config.FPSTarget, 1, 420);
         Config.Priority = Math.Clamp(Config.Priority, 0, 5);
         Config.CustomResX = Math.Clamp(Config.CustomResX, 200, 7680);
         Config.CustomResY = Math.Clamp(Config.CustomResY, 200, 4320);
         Config.MonitorNum = Math.Clamp(Config.MonitorNum, 1, 100);
+
+        if (Config.DllList == null) Config.DllList = new ObservableCollection<string>();
+        else
+        {
+            Config.DllList = new ObservableCollection<string>(
+                Config.DllList
+                    .Where(k => !string.IsNullOrWhiteSpace(k) && File.Exists(k))
+                    .Select(Path.GetFullPath)
+            );
+        }
     }
 
     public void Save()

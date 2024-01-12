@@ -5,7 +5,7 @@ namespace UnlockFps.Gui.Model;
 
 public partial class Config : INotifyPropertyChanged
 {
-    public string GamePath { get; set; }
+    public string? GamePath { get; set; }
 
     public bool AutoStart { get; set; }
     public bool AutoClose { get; set; }
