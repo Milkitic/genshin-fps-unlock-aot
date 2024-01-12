@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace UnlockFps.Gui.Model;
@@ -24,5 +24,5 @@ public partial class Config : INotifyPropertyChanged
     public int MonitorNum { get; set; } = 1;
     public int Priority { get; set; } = 3;
 
-    public List<string> DllList { get; set; } = new();
+    public ObservableCollection<string> DllList { get; set; } = new();
 }

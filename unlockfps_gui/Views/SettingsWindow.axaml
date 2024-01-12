@@ -2,39 +2,81 @@
     x:Class="UnlockFps.Gui.Views.SettingsWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:UnlockFps.Gui.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:UnlockFps.Gui.ViewModels"
     Title="Settings"
     Width="410"
     Height="425"
+    x:DataType="viewModels:SettingsWindowViewModel"
     CanResize="False"
     Icon="/Assets/icon.ico"
+    Loaded="Control_OnLoaded"
+    Unloaded="Control_OnUnloaded"
     mc:Ignorable="d">
+
+    <Design.DataContext>
+        <viewModels:SettingsWindowViewModel />
+    </Design.DataContext>
+
     <Grid Margin="10" RowDefinitions="Auto,*">
-        <Label Content="All settings will be saved automatically" FontWeight="SemiBold" />
-        <TabControl Grid.Row="1" SelectedIndex="2">
+        <Label Content="All settings will be saved immediately" FontWeight="SemiBold" />
+        <TabControl Grid.Row="1" SelectedIndex="0">
             <TabItem Header="General">
                 <StackPanel>
-                    <ToggleSwitch OffContent="Start Minimized (Unlocker)" OnContent="Start minimized (Unlocker)" />
-                    <ToggleSwitch OffContent="Auto Close" OnContent="Auto Close" />
-                    <ToggleSwitch OffContent="Power saving" OnContent="Power saving" />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.StartMinimized}"
+                        OffContent="Start Minimized (Unlocker)"
+                        OnContent="Start minimized (Unlocker)"
+                        ToolTip.Tip="Unlocker will be minimized to tray during startup." />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.AutoClose}"
+                        OffContent="Auto Close"
+                        OnContent="Auto Close"
+                        ToolTip.Tip="Unlocker will exit upon the game closing." />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.UsePowerSave}"
+                        OffContent="Power saving"
+                        OnContent="Power saving"
+                        ToolTip.Tip="Set fps to &quot;10&quot; and process priority to &quot;Low&quot; when the game window is switched to the background." />
                     <Grid Margin="0,10" ColumnDefinitions="Auto,*">
                         <Label Content="Game Process Priority: " />
                         <ComboBox
                             Grid.Column="1"
                             Margin="5,0,0,0"
-                            HorizontalAlignment="Stretch">
+                            HorizontalAlignment="Stretch"
+                            SelectedIndex="{Binding Config.Priority}">
+                            <ComboBoxItem>Realtime</ComboBoxItem>
+                            <ComboBoxItem>High</ComboBoxItem>
+                            <ComboBoxItem>Above Normal</ComboBoxItem>
+                            <ComboBoxItem>Normal</ComboBoxItem>
                             <ComboBoxItem>Below Normal</ComboBoxItem>
+                            <ComboBoxItem>Low</ComboBoxItem>
                         </ComboBox>
                     </Grid>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Launch Options">
                 <StackPanel>
-                    <ToggleSwitch OffContent="Borderless Window" OnContent="Borderless Window" />
-                    <ToggleSwitch OffContent="Fullscreen" OnContent="Fullscreen" />
-                    <ToggleSwitch OffContent="Custom Resolution" OnContent="Custom Resolution" />
-                    <ToggleSwitch OffContent="Use Mobile UI" OnContent="Use Mobile UI" />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.PopupWindow}"
+                        IsEnabled="{Binding Config.Fullscreen, Converter={x:Static BoolConverters.Not}}"
+                        OffContent="Borderless Window"
+                        OnContent="Borderless Window" />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.Fullscreen}"
+                        IsEnabled="{Binding Config.PopupWindow, Converter={x:Static BoolConverters.Not}}"
+                        OffContent="Fullscreen"
+                        OnContent="Fullscreen" />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.UseCustomRes}"
+                        OffContent="Custom Resolution"
+                        OnContent="Custom Resolution" />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.UseMobileUI}"
+                        OffContent="Use Mobile UI"
+                        OnContent="Use Mobile UI" />
 
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
                         <Label
@@ -47,13 +89,21 @@
                             Grid.Column="1"
                             Margin="5,10,0,10"
                             HorizontalAlignment="Stretch"
-                            ColumnDefinitions="*,Auto,*">
-                            <NumericUpDown Value="1920" />
+                            ColumnDefinitions="*,Auto,*"
+                            IsEnabled="{Binding Config.UseCustomRes}">
+                            <NumericUpDown
+                                FormatString="0"
+                                Increment="1"
+                                Value="{Binding Config.CustomResX}" />
                             <Label
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
                                 Content="×" />
-                            <NumericUpDown Grid.Column="2" Value="1080" />
+                            <NumericUpDown
+                                Grid.Column="2"
+                                FormatString="0"
+                                Increment="1"
+                                Value="{Binding Config.CustomResY}" />
                         </Grid>
                         <Label
                             Grid.Row="1"
@@ -64,8 +114,11 @@
                             Grid.Row="1"
                             Grid.Column="1"
                             Margin="5,10,0,10"
-                            HorizontalAlignment="Stretch">
+                            HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding Config.Fullscreen}"
+                            SelectedIndex="{Binding Config.IsExclusiveFullscreen}">
                             <ComboBoxItem>Borderless</ComboBoxItem>
+                            <ComboBoxItem>Exclusive</ComboBoxItem>
                         </ComboBox>
                         <Label
                             Grid.Row="2"
@@ -76,32 +129,62 @@
                             Grid.Row="2"
                             Grid.Column="1"
                             Margin="5,10,0,10"
-                            HorizontalAlignment="Stretch" />
+                            HorizontalAlignment="Stretch"
+                            FormatString="0"
+                            Increment="1"
+                            Value="{Binding Config.MonitorNum}" />
                     </Grid>
                 </StackPanel>
             </TabItem>
             <TabItem Header="DLLs">
                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
-                    <Label Grid.ColumnSpan="2"  Content="DLLs will be injected in the order of this list" />
+                    <Label Grid.ColumnSpan="2" Content="DLLs will be injected in the order of this list" />
                     <ListBox
-                        Grid.Row="1" 
-                        BorderBrush="{DynamicResource TextControlBorderBrush}"
+                        Grid.Row="1"
                         Grid.Column="0"
                         Margin="0,12,0,0"
-                        BorderThickness="1">
-                        <ListBoxItem>test</ListBoxItem>
+                        BorderBrush="{DynamicResource TextControlBorderBrush}"
+                        BorderThickness="1"
+                        ItemsSource="{Binding Config.DllList}"
+                        SelectedItem="{Binding SelectedDll}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource FullPath2NameConverter}}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemContainerTheme>
+                            <ControlTheme BasedOn="{StaticResource {x:Type ListBoxItem}}" TargetType="ListBoxItem">
+                                <Setter Property="ToolTip.Tip" Value="{Binding}" />
+                            </ControlTheme>
+                        </ListBox.ItemContainerTheme>
                     </ListBox>
                     <StackPanel
                         Grid.Row="1"
                         Grid.Column="1"
                         Margin="15,12,0,0">
-                        <Button HorizontalAlignment="Stretch" Content="Add" />
+                        <Button
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding AddDllCommand}"
+                            Content="Add" />
                         <Button
                             Margin="0,15,0,0"
                             HorizontalAlignment="Stretch"
+                            Command="{Binding RemoveDllCommand}"
                             Content="Remove" />
-                        <ToggleSwitch OffContent="Suspend Load" OnContent="Suspend Load" />
-
+                        <ToggleSwitch
+                            IsChecked="{Binding Config.SuspendLoad}"
+                            OffContent="Suspend Load"
+                            OnContent="Suspend Load">
+                            <ToolTip.Tip>
+                                <TextBlock>
+                                    <Run Text="This can ensure dll gets loaded before the game starts." />
+                                    <LineBreak />
+                                    <Run Text="It may not work all the times." />
+                                    <LineBreak />
+                                    <Run Text="Uncheck this if the game crashes." />
+                                </TextBlock>
+                            </ToolTip.Tip>
+                        </ToggleSwitch>
                     </StackPanel>
                 </Grid>
             </TabItem>

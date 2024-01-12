@@ -4,14 +4,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:UnlockFps.Gui.Views"
     Title="Error"
+    x:DataType="views:AlertWindow"
     CanResize="False"
     Icon="/Assets/icon.ico"
     SizeToContent="WidthAndHeight"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
-    <Grid Margin="15" RowDefinitions="Auto,Auto">
-        <StackPanel Margin="15,20" Orientation="Horizontal">
+    <Grid
+        MinWidth="150"
+        Margin="15"
+        RowDefinitions="Auto,Auto">
+        <StackPanel Margin="15,15,15,20" Orientation="Horizontal">
             <Border VerticalAlignment="Top">
                 <TextBlock
                     FontFamily="Segoe MDL2 Assets"
@@ -26,9 +31,9 @@
                 </TextBlock>
             </Border>
             <TextBlock
-                Margin="10,0,0,0"
+                Margin="7,0,0,0"
                 VerticalAlignment="Center"
-                Text="Another unlocker is already running." />
+                Text="{Binding Text}" />
         </StackPanel>
         <Button
             Grid.Row="1"

@@ -2,6 +2,7 @@
     x:Class="UnlockFps.Gui.App"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:UnlockFps.Gui.Converters"
     xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
     RequestedThemeVariant="Default">
     <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
@@ -27,5 +28,8 @@
             <Setter Property="TextDecorations" Value="Underline" />
         </Style>
     </Application.Styles>
-
+    <Application.Resources>
+        <converters:Enum2ListConverter x:Key="Enum2ListConverter" />
+      <converters:FullPath2NameConverter x:Key="FullPath2NameConverter" />
+ </Application.Resources>
 </Application>

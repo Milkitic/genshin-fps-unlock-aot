@@ -3,7 +3,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using UnlockFps.Gui.Service;
-using UnlockFps.Gui.ViewModels;
 using UnlockFps.Gui.Views;
 
 namespace UnlockFps.Gui;
@@ -41,7 +40,9 @@ public partial class App : Application
             }
             else
             {
-                desktop.MainWindow = DefaultServices.GetRequiredService<AlertWindow>();
+                var alertWindow = DefaultServices.GetRequiredService<AlertWindow>();
+                alertWindow.Text = "Another unlocker is already running.";
+                desktop.MainWindow = alertWindow;
             }
         }
 
