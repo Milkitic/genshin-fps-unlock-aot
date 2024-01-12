@@ -91,6 +91,7 @@ namespace UnlockFps.Gui.Views
 
         public SettingsWindow(ConfigService configService)
         {
+            this.SetSystemChrome();
             _configService = configService;
             _viewModel = new SettingsWindowViewModel
             {

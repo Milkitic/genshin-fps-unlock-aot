@@ -12,6 +12,7 @@
     Closing="Window_OnClosing"
     Icon="/Assets/icon.ico"
     SizeToContent="Height"
+    TransparencyLevelHint="Mica"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 

@@ -8,6 +8,7 @@ public partial class AboutWindow : Window
 {
     public AboutWindow()
     {
+        this.SetSystemChrome();
         InitializeComponent();
     }
 

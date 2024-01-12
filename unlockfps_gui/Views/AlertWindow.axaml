@@ -21,13 +21,14 @@
                 <TextBlock
                     FontFamily="Segoe MDL2 Assets"
                     FontSize="32"
+                    Foreground="{DynamicResource SystemFillColorCritical}"
                     Text="&#xEB90;">
-                    <TextBlock.Foreground>
+                    <!--<TextBlock.Foreground>
                         <LinearGradientBrush>
                             <GradientStop Offset="0" Color="#FF2323" />
                             <GradientStop Offset="1" Color="#cc3232" />
                         </LinearGradientBrush>
-                    </TextBlock.Foreground>
+                    </TextBlock.Foreground>-->
                 </TextBlock>
             </Border>
             <TextBlock

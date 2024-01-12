@@ -51,6 +51,7 @@ namespace UnlockFps.Gui.Views
 
         public MainWindow(ConfigService configService)
         {
+            this.SetSystemChrome();
             DataContext = _viewModel = new MainWindowViewModel();
             _configService = configService;
 
@@ -62,5 +63,6 @@ namespace UnlockFps.Gui.Views
         {
             _configService.Save();
         }
+
     }
 }

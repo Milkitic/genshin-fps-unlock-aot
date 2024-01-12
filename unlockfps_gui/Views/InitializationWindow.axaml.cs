@@ -6,6 +6,7 @@ public partial class InitializationWindow : Window
 {
     public InitializationWindow()
     {
+        this.SetSystemChrome();
         InitializeComponent();
     }
 }

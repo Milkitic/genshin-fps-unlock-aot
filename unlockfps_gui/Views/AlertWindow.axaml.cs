@@ -17,6 +17,7 @@ public partial class AlertWindow : Window
 
     public AlertWindow()
     {
+        this.SetSystemChrome();
         DataContext = this;
         InitializeComponent();
     }
