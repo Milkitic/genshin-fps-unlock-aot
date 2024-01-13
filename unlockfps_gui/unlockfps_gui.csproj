@@ -9,6 +9,7 @@
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     <RootNamespace>UnlockFps.Gui</RootNamespace>
     <AssemblyName>unlockfps</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Debug'">

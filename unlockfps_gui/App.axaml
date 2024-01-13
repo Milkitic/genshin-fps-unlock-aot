@@ -31,5 +31,6 @@
     <Application.Resources>
         <converters:Enum2ListConverter x:Key="Enum2ListConverter" />
       <converters:FullPath2NameConverter x:Key="FullPath2NameConverter" />
+      <converters:HasItemsConverter x:Key="HasItemsConverter" />
  </Application.Resources>
 </Application>

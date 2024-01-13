@@ -42,7 +42,6 @@ namespace UnlockFps.Gui.ViewModels
                 if (!VerifyDll(localPath))
                 {
                     var alertWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
-                    alertWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                     alertWindow.Text =
                         $"""
                          Invalid File: 

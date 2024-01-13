@@ -7,21 +7,41 @@
     xmlns:viewModels="clr-namespace:UnlockFps.Gui.ViewModels"
     Title="Initialization"
     Width="475" Loaded="Control_OnLoaded"
-    CanResize="False" 
+    CanResize="False"
     x:DataType="viewModels:InitializationWindowViewModel"
     Icon="/Assets/icon.ico"
-    SizeToContent="Height" 
+    SizeToContent="Height"
     Unloaded="Control_OnUnloaded"
     mc:Ignorable="d">
     <StackPanel Margin="12">
         <Label>
-           <TextBlock>
-               <Run Text="Current Path:"></Run>
-               <Run Text="{Binding Config.GamePath,FallbackValue=undefined}"></Run>
-           </TextBlock>
+            <TextBlock>
+                <Run Text="Current Path:"></Run>
+                <Run Text="{Binding Config.GamePath,FallbackValue=undefined}"></Run>
+            </TextBlock>
         </Label>
         <Label Content="" />
-        <Label Content="Searching..." Foreground="Orange" />
+        <Label
+            Content="Searching..."
+            IsVisible="{Binding IsSearching}"
+            Foreground="{DynamicResource SystemFillColorCaution}" />
+        <Label
+            Classes.green="{Binding InstallationPaths.Count,Converter={StaticResource HasItemsConverter}}"
+            IsVisible="{Binding IsSearching,Converter={x:Static BoolConverters.Not}}">
+            <TextBlock>
+                <Run Text="Found"></Run>
+                <Run Text="{Binding InstallationPaths.Count,Mode=OneWay}"></Run>
+                <Run Text="installation(s) of the game."></Run>
+            </TextBlock>
+            <Label.Styles>
+                <Style Selector="Label">
+                    <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCritical}"></Setter>
+                </Style>
+                <Style Selector="Label.green">
+                    <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccess}"></Setter>
+                </Style>
+            </Label.Styles>
+        </Label>
         <Label Content="Select" />
         <ComboBox
             Width="NaN" SelectedItem="{Binding SelectedInstallationPath}"

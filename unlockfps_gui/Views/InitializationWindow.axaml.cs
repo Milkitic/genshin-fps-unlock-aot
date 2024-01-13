@@ -1,14 +1,17 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using UnlockFps.Gui.Model;
 using UnlockFps.Gui.Service;
+using UnlockFps.Gui.Utils;
 using UnlockFps.Gui.ViewModels;
 
 namespace UnlockFps.Gui.ViewModels
@@ -16,14 +19,9 @@ namespace UnlockFps.Gui.ViewModels
     public class InitializationWindowViewModel : ViewModelBase
     {
         public required Config Config { get; init; }
-        public SearchStatus SearchStatus { get; set; }
+        public bool IsSearching { get; set; } = true;
         public ObservableCollection<string> InstallationPaths { get; } = new();
         public string? SelectedInstallationPath { get; set; }
-    }
-
-    public enum SearchStatus
-    {
-        Searching, NotFound, HasResult
     }
 }
 
@@ -60,6 +58,7 @@ namespace UnlockFps.Gui.Views
         private async void Control_OnLoaded(object? sender, RoutedEventArgs e)
         {
             _cts = new CancellationTokenSource();
+            StartSearchWindow();
             await Task.Run(() => SearchRegistry(_cts.Token));
         }
 
@@ -72,9 +71,83 @@ namespace UnlockFps.Gui.Views
             }
         }
 
+        private void StartSearchWindow()
+        {
+            Task.Run(async () =>
+            {
+                while (_cts is { Token: { IsCancellationRequested: false } token })
+                {
+                    if (await FindWindowAsync())
+                    {
+                        break;
+                    }
+
+                    await Task.Delay(1000, token);
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    var infoWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
+                    infoWindow.IsError = false;
+                    infoWindow.Text = $"""
+                                       Game Found!
+                                       {_configService.Config.GamePath}
+                                       """;
+                    await infoWindow.ShowDialog(this);
+                    Close();
+                });
+            });
+        }
+
+        private async ValueTask<bool> FindWindowAsync()
+        {
+            IntPtr windowHandle = IntPtr.Zero;
+            IntPtr processHandle = IntPtr.Zero;
+            string processPath = string.Empty;
+
+            Native.EnumWindows((hWnd, lParam) =>
+            {
+                const int maxCount = 256;
+                var sb = new StringBuilder(maxCount);
+
+                Native.GetClassName(hWnd, sb, maxCount);
+                if (sb.ToString() != "UnityWndClass") return true;
+
+                windowHandle = hWnd;
+                var err = Native.GetWindowThreadProcessId(hWnd, out var pid);
+                if (err == 0) return true;
+
+                processPath = ProcessUtils.GetProcessPathFromPid(pid, out processHandle);
+                return false;
+            }, IntPtr.Zero);
+
+            if (windowHandle == IntPtr.Zero)
+                return false;
+
+            if (string.IsNullOrEmpty(processPath))
+            {
+                var alertWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
+                alertWindow.Text = """
+                                   Failed to find process path.
+                                   Please use "Browse" instead.
+                                   """;
+                await alertWindow.ShowDialog(this);
+                return false;
+            }
+
+            Native.TerminateProcess(processHandle, 0);
+            Native.CloseHandle(processHandle);
+
+            _configService.Config.GamePath = Path.GetFullPath(processPath);
+            _configService.Save();
+            return true;
+        }
+
 #pragma warning disable CA1416
         private void SearchRegistry(CancellationToken token = default)
         {
+            if (_viewModel == null) return;
+
             using var uninstallKey =
                 Registry.LocalMachine?.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
             if (uninstallKey == null) return;
@@ -134,6 +207,8 @@ namespace UnlockFps.Gui.Views
             {
                 _viewModel.SelectedInstallationPath = installationPaths[0];
             }
+
+            _viewModel.IsSearching = false;
         }
 
         private static string GetIniKey(string s, int indexOf)

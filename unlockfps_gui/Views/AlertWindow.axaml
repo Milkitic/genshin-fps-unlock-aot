@@ -17,10 +17,10 @@
         Margin="15"
         RowDefinitions="Auto,Auto">
         <StackPanel Margin="15,15,15,20" Orientation="Horizontal">
-            <Border VerticalAlignment="Top">
+            <Panel VerticalAlignment="Top">
                 <TextBlock
                     FontFamily="Segoe MDL2 Assets"
-                    FontSize="32"
+                    FontSize="32" IsVisible="{Binding IsError}"
                     Foreground="{DynamicResource SystemFillColorCritical}"
                     Text="&#xEB90;">
                     <!--<TextBlock.Foreground>
@@ -30,7 +30,13 @@
                         </LinearGradientBrush>
                     </TextBlock.Foreground>-->
                 </TextBlock>
-            </Border>
+                <TextBlock
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="32" IsVisible="{Binding IsError,Converter={x:Static BoolConverters.Not}}"
+                    Foreground="{DynamicResource SystemFillColorSuccess}"
+                    Text="&#xF167;">
+                </TextBlock>
+            </Panel>
             <TextBlock
                 Margin="7,0,0,0"
                 VerticalAlignment="Center"
