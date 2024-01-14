@@ -58,8 +58,8 @@
         </Label>
         <DockPanel Margin="3">
             <Panel DockPanel.Dock="Bottom">
-                <Button Content="Browse..." />
-                <Button HorizontalAlignment="Right" Content="Confirm" />
+                <Button Content="Browse..." Click="BtnBrowse_OnClick" />
+                <Button HorizontalAlignment="Right" Content="Confirm" Click="BtnConfirm_OnClick" />
             </Panel>
         </DockPanel>
     </StackPanel>

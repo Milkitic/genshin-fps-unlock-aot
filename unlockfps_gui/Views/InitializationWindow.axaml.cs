@@ -1,11 +1,13 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
@@ -210,6 +212,7 @@ namespace UnlockFps.Gui.Views
 
             _viewModel.IsSearching = false;
         }
+#pragma warning restore CA1416
 
         private static string GetIniKey(string s, int indexOf)
         {
@@ -220,6 +223,58 @@ namespace UnlockFps.Gui.Views
         {
             return s.Substring(indexOf + 1).Trim();
         }
-#pragma warning restore CA1416
+
+        private void BtnConfirm_OnClick(object? sender, RoutedEventArgs e)
+        {
+            var selectedPath = _viewModel.SelectedInstallationPath;
+            if (string.IsNullOrEmpty(selectedPath))
+                return;
+
+            _configService.Config.GamePath = selectedPath;
+            _configService.Save();
+            Close();
+        }
+
+        private async void BtnBrowse_OnClick(object? sender, RoutedEventArgs e)
+        {
+            var selectedPath = (await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Select GenshinImpact.exe or YuanShen.exe",
+                FileTypeFilter =
+                [
+                    new FilePickerFileType("Executable Files (*.exe)") { Patterns = ["GenshinImpact.exe;YuanShen.exe"] }
+                ],
+                AllowMultiple = true
+            })).FirstOrDefault()?.TryGetLocalPath();
+            if (selectedPath == null) return;
+
+            var fileName = Path.GetFileNameWithoutExtension(selectedPath);
+
+            if (fileName != "GenshinImpact" && fileName != "YuanShen")
+            {
+                var alertWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
+                alertWindow.Text =
+                    $"""
+                     Please select the game exe
+                     GenshinImpact.exe or YuanShen.exe
+                     """;
+                await alertWindow.ShowDialog(this);
+                return;
+            }
+
+            var directory = Path.GetDirectoryName(selectedPath);
+            var unityPlayer = Path.Combine(directory, "UnityPlayer.dll");
+            if (!File.Exists(unityPlayer))
+            {
+                var alertWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
+                alertWindow.Text = "That's not the right place";
+                await alertWindow.ShowDialog(this);
+                return;
+            }
+
+            _configService.Config.GamePath = selectedPath;
+            _configService.Save();
+            Close();
+        }
     }
 }
