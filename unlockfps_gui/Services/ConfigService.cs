@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnlockFps.Gui.Model;
 
-namespace UnlockFps.Gui.Service;
+namespace UnlockFps.Gui.Services;
 
 public class ConfigService
 {

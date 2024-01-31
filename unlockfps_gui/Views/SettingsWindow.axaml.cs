@@ -8,7 +8,7 @@ using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using UnlockFps.Gui.Model;
-using UnlockFps.Gui.Service;
+using UnlockFps.Gui.Services;
 using UnlockFps.Gui.ViewModels;
 using UnlockFps.Gui.Views;
 

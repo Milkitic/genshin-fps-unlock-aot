@@ -56,7 +56,10 @@
                     IsChecked="{Binding Config.AutoStart}"
                     OffContent="Start game automatically"
                     OnContent="Start game automatically" />
-                <Button Grid.Column="1" Content="Launch" />
+                <Button
+                    Grid.Column="1"
+                Click="BtnLaunchGame_OnClick"
+                    Content="Launch" />
             </Grid>
         </StackPanel>
     </Grid>

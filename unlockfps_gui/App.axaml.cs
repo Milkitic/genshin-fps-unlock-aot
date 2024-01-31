@@ -1,8 +1,9 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
-using UnlockFps.Gui.Service;
+using UnlockFps.Gui.Services;
 using UnlockFps.Gui.Views;
 
 namespace UnlockFps.Gui;
@@ -10,6 +11,9 @@ namespace UnlockFps.Gui;
 public partial class App : Application
 {
     public static ServiceProvider DefaultServices { get; private set; } = null!;
+
+    public static Window? CurrentMainWindow =>
+        (App.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
 
     public override void Initialize()
     {

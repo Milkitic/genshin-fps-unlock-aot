@@ -28,7 +28,7 @@ namespace UnlockFps.Gui.Utils
             return sb.ToString();
         }
 
-        public static bool InjectDlls(IntPtr processHandle, List<string> dllPaths)
+        public static bool InjectDlls(IntPtr processHandle, IReadOnlyList<string> dllPaths)
         {
             if (dllPaths.Count == 0)
                 return true;

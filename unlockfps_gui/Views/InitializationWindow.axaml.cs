@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -12,7 +12,7 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using UnlockFps.Gui.Model;
-using UnlockFps.Gui.Service;
+using UnlockFps.Gui.Services;
 using UnlockFps.Gui.Utils;
 using UnlockFps.Gui.ViewModels;
 
@@ -159,7 +159,7 @@ namespace UnlockFps.Gui.Views
 
             foreach (var key in keys)
             {
-                if (key is not ("Genshin Impact" or "Ô­Éñ")) continue;
+                if (key is not ("Genshin Impact" or "Ô­ï¿½ï¿½")) continue;
 
                 using var subKey = uninstallKey.OpenSubKey(key);
                 if (subKey == null)
