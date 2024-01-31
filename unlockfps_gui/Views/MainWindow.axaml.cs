@@ -78,6 +78,7 @@ namespace UnlockFps.Gui.Views
                 await MainWindowViewModel.ShowWindow<InitializationWindow>();
             }
 
+            if (!File.Exists(_viewModel.Config.GamePath)) return;
             if (await _processService.StartAsync())
             {
                 WindowState = WindowState.Minimized;

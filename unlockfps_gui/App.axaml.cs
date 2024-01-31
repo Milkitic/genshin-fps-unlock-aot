@@ -31,6 +31,7 @@ public partial class App : Application
         services.AddTransient<MainWindow>();
         services.AddTransient<SettingsWindow>();
         services.AddSingleton<ConfigService>();
+        services.AddSingleton<ProcessService>();
         DefaultServices = services.BuildServiceProvider();
     }
 

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using UnlockFps.Gui.Model;
 using UnlockFps.Gui.Utils;
@@ -64,9 +65,9 @@ public class ProcessService
     {
         if (IsGameRunning())
         {
-            var infoWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
-            infoWindow.Text = "An instance of the game is already running.";
-            await infoWindow.ShowDialog(App.CurrentMainWindow!);
+            await ShowErrorMessage(
+                "An instance of the game is already running."
+            );
             return false;
         }
 
@@ -123,19 +124,17 @@ public class ProcessService
 
         if (!Native.CreateProcess(_config.GamePath, BuildCommandLine(), IntPtr.Zero, IntPtr.Zero, false, creationFlag, IntPtr.Zero, gameFolder, ref si, out var pi))
         {
-            var infoWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
-            infoWindow.Text =
-                $"CreateProcess failed ({Marshal.GetLastWin32Error()}){Environment.NewLine} {Marshal.GetLastPInvokeErrorMessage()}";
-            await infoWindow.ShowDialog(App.CurrentMainWindow!);
+            await ShowErrorMessage(
+                $"CreateProcess failed ({Marshal.GetLastWin32Error()}){Environment.NewLine} {Marshal.GetLastPInvokeErrorMessage()}"
+            );
             return;
         }
 
         if (!ProcessUtils.InjectDlls(pi.hProcess, _config.DllList))
         {
-            var infoWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
-            infoWindow.Text =
-                $"Dll Injection failed ({Marshal.GetLastWin32Error()}){Environment.NewLine} {Marshal.GetLastPInvokeErrorMessage()}";
-            await infoWindow.ShowDialog(App.CurrentMainWindow!);
+            await ShowErrorMessage(
+                $"Dll Injection failed ({Marshal.GetLastWin32Error()}){Environment.NewLine} {Marshal.GetLastPInvokeErrorMessage()}"
+            );
         }
 
         if (_config.SuspendLoad)
@@ -212,9 +211,9 @@ public class ProcessService
 
         if (!pUnityPlayer || !pUserAssembly)
         {
-            var infoWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
-            infoWindow.Text = "Failed to load UnityPlayer.dll or UserAssembly.dll";
-            infoWindow.ShowDialog(App.CurrentMainWindow!);
+            ShowErrorMessage(
+                "Failed to load UnityPlayer.dll or UserAssembly.dll"
+            );
             return false;
         }
 
@@ -281,9 +280,9 @@ public class ProcessService
         return true;
 
 BAD_PATTERN:
-        var infoWindow1 = App.DefaultServices.GetRequiredService<AlertWindow>();
-        infoWindow1.Text = "outdated fps pattern";
-        infoWindow1.ShowDialog(App.CurrentMainWindow!);
+        ShowErrorMessage(
+            "outdated fps pattern"
+        );
         return false;
     }
 
@@ -308,13 +307,23 @@ BAD_PATTERN:
 
         if (_remoteUnityPlayer == IntPtr.Zero || _remoteUserAssembly == IntPtr.Zero)
         {
-            var infoWindow1 = App.DefaultServices.GetRequiredService<AlertWindow>();
-            infoWindow1.Text = "Failed to get remote module base address";
-            await infoWindow1.ShowDialog(App.CurrentMainWindow!);
+            await ShowErrorMessage(
+                "Failed to get remote module base address"
+            );
             return false;
         }
 
         return true;
     }
 
+    private static async Task ShowErrorMessage(string infoWindowText)
+    {
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            var infoWindow = App.DefaultServices.GetRequiredService<AlertWindow>();
+            infoWindow.Text =
+                infoWindowText;
+            await infoWindow.ShowDialog(App.CurrentMainWindow!);
+        });
+    }
 }
