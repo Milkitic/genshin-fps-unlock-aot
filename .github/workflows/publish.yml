@@ -24,15 +24,11 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Restore dependencies
-      run: |
-        dotnet restore unlockfps_gui
-
     - name: Publish
       if: ${{ success() }}
       run: |
         echo ${{ github.ref }}      
-        dotnet publish unlockfps_gui --no-restore --runtime win-x64 --configuration Release --output ci-publish-win64
+        dotnet publish unlockfps_gui --runtime win-x64 --configuration Release --output ci-publish-win64
 
     - name: Get tag
       uses: dawidd6/action-get-tag@v1
