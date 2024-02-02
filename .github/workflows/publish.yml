@@ -26,9 +26,11 @@ jobs:
 
     - name: Publish
       if: ${{ success() }}
+      shell: pwsh
       run: |
         echo ${{ github.ref }}      
         dotnet publish unlockfps_gui --runtime win-x64 --configuration Release --output ci-publish-win64
+        rm ./ci-publish-win64/*.pdb
 
     - name: Get tag
       uses: dawidd6/action-get-tag@v1
