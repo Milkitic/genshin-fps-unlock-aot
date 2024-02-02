@@ -7,6 +7,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <RootNamespace>UnlockFps.Gui</RootNamespace>
     <AssemblyName>unlockfps</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
