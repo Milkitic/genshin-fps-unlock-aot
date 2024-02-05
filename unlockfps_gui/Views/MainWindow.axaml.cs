@@ -121,6 +121,18 @@ namespace UnlockFps.Gui.Views
             _configService.Save();
         }
 
+        private void Window_OnClosed(object? sender, EventArgs e)
+        {
+            try
+            {
+                ConsoleManager.Hide();
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
         private async void BtnLaunchGame_OnClick(object? sender, RoutedEventArgs e)
         {
             await LaunchGame(false);

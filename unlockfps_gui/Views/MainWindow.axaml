@@ -9,6 +9,7 @@
     Width="320"
     x:DataType="vm:MainWindowViewModel"
     CanResize="False"
+    Closed="Window_OnClosed"
     Closing="Window_OnClosing"
     Icon="/Assets/icon.ico"
     Loaded="Window_OnLoaded"
