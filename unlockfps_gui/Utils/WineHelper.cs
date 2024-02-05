@@ -24,6 +24,12 @@ internal static partial class WineHelper
             buildId = null;
             return false;
         }
+        catch (DllNotFoundException)
+        {
+            version = null;
+            buildId = null;
+            return false;
+        }
     }
 
     [LibraryImport("ntdll", EntryPoint = "wine_get_version", StringMarshalling = StringMarshalling.Utf8)]
