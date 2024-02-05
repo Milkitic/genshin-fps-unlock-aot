@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using UnlockFps.Gui.Utils;
 
 namespace UnlockFps.Gui;
 
@@ -15,6 +19,7 @@ internal sealed class Program
     {
         using (new Mutex(true, @"GenshinFPSUnlocker", out var createdNew))
         {
+            ConsoleManager.Show();
             DuplicatedInstance = !createdNew;
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
@@ -25,9 +30,25 @@ internal sealed class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        var appBuilder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithNativeFonts()
             .LogToTrace()
             .UseReactiveUI();
+        if (WineHelper.DetectWine(out _, out _))
+        {
+            return appBuilder
+                .With(new Win32PlatformOptions
+                {
+                    CompositionMode = [Win32CompositionMode.RedirectionSurface],
+                    RenderingMode = [Win32RenderingMode.Software],
+                    OverlayPopups = true
+                });
+        }
+        else
+        {
+            return appBuilder;
+        }
+    }
 }

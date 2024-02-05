@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using UnlockFps.Gui.Model;
 using UnlockFps.Gui.Services;
+using UnlockFps.Gui.Utils;
 using UnlockFps.Gui.ViewModels;
 using UnlockFps.Gui.Views;
 
@@ -64,6 +65,11 @@ namespace UnlockFps.Gui.Views
 
             _viewModel.Config = configService.Config;
             InitializeComponent();
+            
+            if (WineHelper.DetectWine(out var version, out var buildId))
+            {
+                Title += $" (Wine {version})";
+            }
         }
 
         private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
