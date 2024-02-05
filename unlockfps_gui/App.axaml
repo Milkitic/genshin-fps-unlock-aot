@@ -30,7 +30,30 @@
     </Application.Styles>
     <Application.Resources>
         <converters:Enum2ListConverter x:Key="Enum2ListConverter" />
-      <converters:FullPath2NameConverter x:Key="FullPath2NameConverter" />
-      <converters:HasItemsConverter x:Key="HasItemsConverter" />
- </Application.Resources>
+        <converters:FullPath2NameConverter x:Key="FullPath2NameConverter" />
+        <converters:HasItemsConverter x:Key="HasItemsConverter" />
+    </Application.Resources>
+
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon
+                Icon="/Assets/icon.ico"
+                IsVisible="False"
+                ToolTipText="Avalonia Tray Icon ToolTip">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="Settings">
+                            <NativeMenu>
+                                <NativeMenuItem Header="Option 1" />
+                                <NativeMenuItem Header="Option 2" />
+                                <NativeMenuItemSeparator />
+                                <NativeMenuItem Header="Option 3" />
+                            </NativeMenu>
+                        </NativeMenuItem>
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
+
 </Application>
