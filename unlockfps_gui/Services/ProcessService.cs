@@ -130,6 +130,7 @@ public class ProcessService
             return;
         }
 
+        Console.WriteLine($"Created process. hProcess: {pi.hProcess}; hThread: {pi.hThread}");
         if (!ProcessUtils.InjectDlls(pi.hProcess, _config.DllList))
         {
             await ShowErrorMessage(
@@ -222,10 +223,12 @@ public class ProcessService
 
         if (ntHeader.FileHeader.TimeDateStamp < 0x656FFAF7U) // < 3.7
         {
+            Console.WriteLine($"TimeDateStamp={ntHeader.FileHeader.TimeDateStamp}, <3.7");
             byte* address = (byte*)ProcessUtils.PatternScan(pUnityPlayer, "7F 0F 8B 05 ? ? ? ?");
             if (address == null)
                 goto BAD_PATTERN;
 
+            Console.WriteLine($"Scanned pattern successfully: " + address->ToString());
             byte* rip = address + 2;
             int rel = *(int*)(rip + 2);
             var localVa = rip + rel + 6;
@@ -237,20 +240,24 @@ public class ProcessService
             byte* rip = null;
             if (ntHeader.FileHeader.TimeDateStamp < 0x656FFAF7U) // < 4.3
             {
+                Console.WriteLine($"TimeDateStamp={ntHeader.FileHeader.TimeDateStamp}, <4.3");
                 byte* address = (byte*)ProcessUtils.PatternScan(pUserAssembly, "E8 ? ? ? ? 85 C0 7E 07 E8 ? ? ? ? EB 05");
                 if (address == null)
                     goto BAD_PATTERN;
 
+                Console.WriteLine($"Scanned pattern successfully: " + address->ToString());
                 rip = address;
                 rip += *(int*)(rip + 1) + 5;
                 rip += *(int*)(rip + 3) + 7;
             }
             else
             {
+                Console.WriteLine($"TimeDateStamp={ntHeader.FileHeader.TimeDateStamp}");
                 byte* address = (byte*)ProcessUtils.PatternScan(pUserAssembly, "B9 3C 00 00 00 FF 15");
                 if (address == null)
                     goto BAD_PATTERN;
 
+                Console.WriteLine($"Scanned pattern successfully: " + address->ToString());
                 rip = address;
                 rip += 5;
                 rip += *(int*)(rip + 2) + 6;
@@ -277,6 +284,7 @@ public class ProcessService
             _pFpsValue = (IntPtr)(_remoteUnityPlayer.ToInt64() + rva);
         }
 
+        Console.WriteLine($"Get FPS address successfully: {_pFpsValue}");
         return true;
 
 BAD_PATTERN:
@@ -290,8 +298,9 @@ BAD_PATTERN:
     {
         int retries = 0;
 
-        while (true)
+        while (IsGameRunning())
         {
+            Console.WriteLine("Trying to get remote module base address...");
             _remoteUnityPlayer = ProcessUtils.GetModuleBase(_gameHandle, "UnityPlayer.dll");
             _remoteUserAssembly = ProcessUtils.GetModuleBase(_gameHandle, "UserAssembly.dll");
 
