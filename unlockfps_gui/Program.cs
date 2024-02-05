@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Avalonia;
 using Avalonia.ReactiveUI;
@@ -19,7 +16,15 @@ internal sealed class Program
     {
         using (new Mutex(true, @"GenshinFPSUnlocker", out var createdNew))
         {
-            ConsoleManager.Show();
+            try
+            {
+                ConsoleManager.Show();
+            }
+            catch
+            {
+                // ignored
+            }
+
             DuplicatedInstance = !createdNew;
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
