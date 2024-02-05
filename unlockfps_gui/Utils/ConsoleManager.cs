@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -28,7 +29,9 @@ internal static class ConsoleManager
         COMMON_LVB_REVERSE_VIDEO = 0x4000,
         COMMON_LVB_UNDERSCORE = 0x8000
     }
-
+    
+    private static ConsoleEventDelegate? _handler;
+    private delegate bool ConsoleEventDelegate(int eventType);
     public static bool HasConsole => GetConsoleWindow() != IntPtr.Zero;
 
     private const string Kernel32_DllName = "kernel32.dll";
@@ -47,6 +50,17 @@ internal static class ConsoleManager
     [DllImport(Kernel32_DllName)]
     private static extern int SetConsoleTextAttribute(IntPtr hConsoleOutput,
         CharacterAttributes wAttributes);
+    [DllImport(Kernel32_DllName, SetLastError = true)]
+    private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
+
+    private const int MF_BYCOMMAND = 0x00000000;
+    public const int SC_CLOSE = 0xF060;
+
+    [DllImport("user32.dll")]
+    public static extern int DeleteMenu(IntPtr hMenu, int nPosition, int wFlags);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
 
     /// <summary>
     /// Creates a new console instance if the process is not attached to a console already.
@@ -58,7 +72,27 @@ internal static class ConsoleManager
         //var intPtr = GetConsoleWindow();
         //SetConsoleTextAttribute(intPtr,
         //    CharacterAttributes.BACKGROUND_INTENSITY | CharacterAttributes.FOREGROUND_INTENSITY);
-        InvalidateOutAndError();
+        InvalidateOutAndError();    
+        
+        Console.Title = "Genshin FPS Unlocker Debugging Console";
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Note: Closing this window will lead to program exiting.");
+        Console.ResetColor();
+        var hMenu = GetSystemMenu(GetConsoleWindow(), false);
+        DeleteMenu(hMenu, SC_CLOSE, MF_BYCOMMAND);
+    }
+
+    public static void BindExitAction(Action? exitAction)
+    {
+        if (exitAction == null || _handler != null) return;
+        _handler = eventType =>
+        {
+            if (eventType != 2) return false;
+            exitAction();
+            return true;
+        };
+
+        SetConsoleCtrlHandler(_handler, true);
     }
 
     /// <summary>

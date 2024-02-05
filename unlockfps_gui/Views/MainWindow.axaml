@@ -11,6 +11,7 @@
     CanResize="False"
     Closing="Window_OnClosing"
     Icon="/Assets/icon.ico"
+    Loaded="Window_OnLoaded"
     SizeToContent="Height"
     TransparencyLevelHint="Mica"
     WindowStartupLocation="CenterScreen"
@@ -58,7 +59,7 @@
                     OnContent="Start game automatically" />
                 <Button
                     Grid.Column="1"
-                Click="BtnLaunchGame_OnClick"
+                    Click="BtnLaunchGame_OnClick"
                     Content="Launch" />
             </Grid>
         </StackPanel>

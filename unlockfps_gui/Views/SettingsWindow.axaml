@@ -39,6 +39,10 @@
                         OffContent="Power saving mode"
                         OnContent="Power saving mode"
                         ToolTip.Tip="Set fps to &quot;10&quot; and process priority to &quot;Low&quot; when the game window is switched to the background." />
+                    <ToggleSwitch
+                        IsChecked="{Binding Config.ShowDebugConsole}"
+                        OffContent="Show debug console"
+                        OnContent="Show debug console" />
                     <Grid Margin="0,10" ColumnDefinitions="Auto,*">
                         <Label Content="Game Process Priority: " />
                         <ComboBox

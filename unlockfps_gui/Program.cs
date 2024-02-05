@@ -16,15 +16,6 @@ internal sealed class Program
     {
         using (new Mutex(true, @"GenshinFPSUnlocker", out var createdNew))
         {
-            try
-            {
-                ConsoleManager.Show();
-            }
-            catch
-            {
-                // ignored
-            }
-
             DuplicatedInstance = !createdNew;
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);

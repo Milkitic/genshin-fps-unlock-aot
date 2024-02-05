@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using UnlockFps.Gui.Utils;
 
 namespace UnlockFps.Gui.Model;
 
@@ -24,5 +25,32 @@ public partial class Config : INotifyPropertyChanged
     public int MonitorNum { get; set; } = 1;
     public int Priority { get; set; } = 3;
 
+    public bool ShowDebugConsole { get; set; }
+
     public ObservableCollection<string> DllList { get; set; } = new();
+
+    public Config()
+    {
+        this.PropertyChanged += Config_PropertyChanged;
+    }
+
+    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ShowDebugConsole)) return;
+        try
+        {
+            if (ShowDebugConsole)
+            {
+                ConsoleManager.Show();
+            }
+            else
+            {
+                ConsoleManager.Hide();
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+    }
 }
