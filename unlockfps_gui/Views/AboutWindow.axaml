@@ -14,7 +14,7 @@
         <TextBlock TextAlignment="Center" TextWrapping="Wrap">
             <Run Text="Genshin FPS Unlocker" />
             <LineBreak />
-            <Run Text="v xx" />
+            <Run x:Name="Run_Version" Text="" />
             <LineBreak />
 
             <Run Text="Forked version based on:" />

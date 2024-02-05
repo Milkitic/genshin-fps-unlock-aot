@@ -11,6 +11,15 @@
     <RootNamespace>UnlockFps.Gui</RootNamespace>
     <AssemblyName>unlockfps</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+
+    <Authors>Milkitic</Authors>
+    <Product>Genshin FPS Unlocker</Product>
+    <Description>Genshin FPS Unlocker</Description>
+    <Copyright>Copyright © Milkitic $([System.DateTime]::Now.Year)</Copyright>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
@@ -29,9 +38,14 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.6" />
     <PackageReference Include="FluentAvaloniaUI" Version="2.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="MinVer" Version="4.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Semver" Version="2.3.0" />
   </ItemGroup>
 </Project>
