@@ -12,7 +12,9 @@ internal static class ReflectionUtil
     {
         if (_version != null) return _version;
 
-        var runner = AssemblyAttributeUtil.GetAssemblyAttribute<AssemblyInformationalVersionAttribute>(out var core);
+        //var runner = AssemblyAttributeUtil.GetAssemblyAttribute<AssemblyInformationalVersionAttribute>(out var core);
+        var runner = typeof(ReflectionUtil).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        var core = default(AssemblyInformationalVersionAttribute);
         var runnerVersion = runner!.InformationalVersion;
         FixCommit(ref runnerVersion);
 
@@ -58,7 +60,17 @@ internal static class ReflectionUtil
         if (!semVer.IsPrerelease)
         {
             var lastIndexOf = version.LastIndexOf('+');
-            version = version.Substring(0, lastIndexOf);
+
+            var lastIndexOfDot = version.LastIndexOf('.');
+            var subStr = version.Substring(lastIndexOfDot + 1);
+            if (subStr.Length == 40)
+            {
+                version = version.Substring(0, lastIndexOfDot);
+            }
+            else
+            {
+                version = version.Substring(0, lastIndexOf);
+            }
         }
         else if (semVer.Metadata.Length > 7)
         {
