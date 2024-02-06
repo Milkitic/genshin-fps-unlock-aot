@@ -195,6 +195,7 @@ namespace UnlockFps.Gui.Views
             catch (Exception ex)
             {
                 await ShowErrorMessage(ex.Message);
+                _viewModel.PreparingLog = null;
             }
 
             return;
