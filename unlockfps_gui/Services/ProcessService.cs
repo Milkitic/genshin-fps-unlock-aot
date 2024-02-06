@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
 using UnlockFps.Gui.Model;
 using UnlockFps.Gui.Utils;
 using UnlockFps.Gui.Views;
@@ -41,6 +41,8 @@ public class ProcessService
 
     private readonly ConfigService _configService;
     private readonly Config _config;
+
+    private byte[] _fpsReadBuffer = new byte[4];
 
     public ProcessService(ConfigService configService)
     {
@@ -152,11 +154,20 @@ public class ProcessService
         if (!SetupData())
             return;
 
+        var processId = Process.GetProcessById(_gamePid);
+        while (processId.MainWindowHandle == IntPtr.Zero && !_cts.Token.IsCancellationRequested)
+        {
+            await Console.Out.WriteLineAsync("Waiting game window to open...");
+            await Task.Delay(1000, _cts.Token);
+        }
+
         while (IsGameRunning() && !_cts.Token.IsCancellationRequested)
         {
             ApplyFpsLimit();
-            await Task.Delay(1000, _cts.Token);
+            await Task.Delay(200, _cts.Token);
         }
+
+        await Console.Out.WriteLineAsync("Game exited.");
 
         if (!IsGameRunning() && _config.AutoClose)
         {
@@ -174,8 +185,16 @@ public class ProcessService
     private void ApplyFpsLimit()
     {
         int fpsTarget = _gameInForeground ? _config.FPSTarget : _config.UsePowerSave ? 10 : _config.FPSTarget;
-        var toWrite = BitConverter.GetBytes(fpsTarget);
-        Native.WriteProcessMemory(_gameHandle, _pFpsValue, toWrite, 4, out _);
+        if (Native.ReadProcessMemory(_gameHandle, _pFpsValue, _fpsReadBuffer, 4, out var readBytes))
+        {
+            var currentFps = BitConverter.ToInt32(_fpsReadBuffer, 0);
+            if (currentFps != fpsTarget)
+            {
+                var toWrite = BitConverter.GetBytes(fpsTarget);
+                Native.WriteProcessMemory(_gameHandle, _pFpsValue, toWrite, 4, out _);
+                Console.WriteLine($"FPS Change: {currentFps} -> {fpsTarget}");
+            }
+        }
     }
 
     private string BuildCommandLine()
