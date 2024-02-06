@@ -1,4 +1,8 @@
-# WIP: Trying to refactor with Avalonia to enable AOT support in order to run normally on Linux
+# Running with WINE:
+## Perequisite
+winetricks dotnet45
+winecfg -v win7
+wine unlockfps.exe
 
 # Genshin Impact FPS Unlocker
  - This tool helps you to unlock the 60 fps limit in the game
