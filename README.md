@@ -1,6 +1,6 @@
 # Genshin Impact FPS Unlocker
 
-A forked version that rewrites GUI and supports linux with WINE.
+A forked version which rewrites GUI and supports linux with WINE.
 
 ![image](https://github.com/Milkitic/genshin-fps-unlock-aot/assets/24785749/0d3613fb-63e6-4070-b5be-a3831610a349)
 
