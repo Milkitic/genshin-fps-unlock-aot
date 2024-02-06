@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -159,7 +161,7 @@ namespace UnlockFps.Gui.Views
 
             foreach (var key in keys)
             {
-                if (key is not ("Genshin Impact" or "ԭ��")) continue;
+                if (key is not ("Genshin Impact" or "\u539f\u795e")) continue;
 
                 using var subKey = uninstallKey.OpenSubKey(key);
                 if (subKey == null)
@@ -184,7 +186,7 @@ namespace UnlockFps.Gui.Views
                     var iniKey = GetIniKey(line, indexOf);
                     if (iniKey.Equals("game_install_path", StringComparison.Ordinal))
                     {
-                        gamePath = GetIniValue(line, indexOf);
+                        gamePath = ConvertIniValue(GetIniValue(line, indexOf));
                     }
                     else if (iniKey.Equals("game_start_name", StringComparison.Ordinal))
                     {
@@ -194,7 +196,7 @@ namespace UnlockFps.Gui.Views
 
                 if (gamePath == null || gameName == null) continue;
 
-                var combine = Path.Combine(gamePath, gameName);
+                var combine = Path.GetFullPath(Path.Combine(gamePath, gameName));
                 if (File.Exists(combine))
                 {
                     Dispatcher.UIThread.Invoke(() =>
@@ -222,6 +224,30 @@ namespace UnlockFps.Gui.Views
         private static string GetIniValue(string s, int indexOf)
         {
             return s.Substring(indexOf + 1).Trim();
+        }
+
+        private static string ConvertIniValue(string iniValue)
+        {
+            var stringBuilder = new StringBuilder();
+            var charSpan = iniValue.AsSpan();
+            for (var i = 0; i < charSpan.Length; i++)
+            {
+                var c = iniValue[i];
+                if (c == '\\' && i < charSpan.Length - 5 && charSpan[i + 1] == 'x')
+                {
+                    var readOnlySpan = charSpan.Slice(i + 2, 4);
+                    if (ushort.TryParse(readOnlySpan, NumberStyles.HexNumber, null, out var value))
+                    {
+                        stringBuilder.Append((char)value);
+                        i += 5;
+                        continue;
+                    }
+                }
+
+                stringBuilder.Append(c);
+            }
+
+            return stringBuilder.ToString();
         }
 
         private void BtnConfirm_OnClick(object? sender, RoutedEventArgs e)
