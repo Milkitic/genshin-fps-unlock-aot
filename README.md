@@ -1,8 +1,10 @@
-# Running with WINE:
+# Running with WINE
 ## Perequisite
-winetricks dotnet45
-winecfg -v win7
-wine unlockfps.exe
+```
+WINEPREFIX=... winetricks dotnet45
+WINEPREFIX=... winecfg -v win7
+WINEPREFIX=... wine unlockfps.exe
+```
 
 # Genshin Impact FPS Unlocker
  - This tool helps you to unlock the 60 fps limit in the game
