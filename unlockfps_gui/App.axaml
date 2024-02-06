@@ -42,16 +42,23 @@
                 ToolTipText="Avalonia Tray Icon ToolTip">
                 <TrayIcon.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="Settings">
-                            <NativeMenu>
-                                <NativeMenuItem Header="Option 1" />
-                                <NativeMenuItem Header="Option 2" />
-                                <NativeMenuItemSeparator />
-                                <NativeMenuItem Header="Option 3" />
-                            </NativeMenu>
-                        </NativeMenuItem>
+                        <NativeMenuItem Header="_Show Panel" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="_Exit" />
                     </NativeMenu>
                 </TrayIcon.Menu>
+                <!-- <TrayIcon.Menu> -->
+                <!--     <NativeMenu> -->
+                <!--         <NativeMenuItem Header="Settings"> -->
+                <!--             <NativeMenu> -->
+                <!--                 <NativeMenuItem Header="Option 1" /> -->
+                <!--                 <NativeMenuItem Header="Option 2" /> -->
+                <!--                 <NativeMenuItemSeparator /> -->
+                <!--                 <NativeMenuItem Header="Option 3" /> -->
+                <!--             </NativeMenu> -->
+                <!--         </NativeMenuItem> -->
+                <!--     </NativeMenu> -->
+                <!-- </TrayIcon.Menu> -->
             </TrayIcon>
         </TrayIcons>
     </TrayIcon.Icons>

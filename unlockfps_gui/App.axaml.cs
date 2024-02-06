@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -39,6 +41,8 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+
             if (!Program.DuplicatedInstance)
             {
                 desktop.MainWindow = DefaultServices.GetRequiredService<MainWindow>();
@@ -52,5 +56,17 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static void TaskSchedulerOnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        if (e.Exception.InnerExceptions.Count == 1)
+        {
+            Console.WriteLine("Unobserved task exception: " + e.Exception.InnerException);
+        }
+        else
+        {
+            Console.WriteLine("Unobserved task exception: " + e.Exception);
+        }
     }
 }
