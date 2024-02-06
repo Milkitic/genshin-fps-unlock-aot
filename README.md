@@ -4,6 +4,8 @@ A forked version which rewrites GUI and supports linux with WINE.
 
 ![image](https://github.com/Milkitic/genshin-fps-unlock-universal/assets/24785749/e92fe460-c045-46ef-bbf1-7f350e7eb179)
 
+> Running in Windows 11 & Linux KDE
+
  - This tool helps you to unlock the 60 fps limit in the game
  - This is an external program which uses **WriteProcessMemory** to write the desired fps to the game
  - Handle protection bypass is already included
@@ -15,7 +17,7 @@ A forked version which rewrites GUI and supports linux with WINE.
 
  ## Compiling
  1. Install Visual Studio 2022 with Desktop C++ workload in Visual Studio Installer.
- 2. Install .NET 8 sdk.
+ 2. Install .NET 8 SDK.
  3. Use `dotnet build ./unlockfps_gui` for regular compiling. Use `dotnet publish ./unlockfps_gui -c Release -r win-x64` for AOT publish.
 
  ## Usage
