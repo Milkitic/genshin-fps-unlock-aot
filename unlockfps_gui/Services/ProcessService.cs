@@ -160,19 +160,6 @@ public class ProcessService : ViewModelBase, IDisposable
             }
 
             await Console.Out.WriteLineAsync("Game exited.");
-
-            if (!IsGameRunning() && _config.AutoClose)
-            {
-                Task.Run(async () =>
-                {
-                    await Task.Delay(2000);
-                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
-                    {
-                        lifetime.Shutdown();
-                    }
-                });
-            }
-
             await cts.CancelAsync();
             cts.Dispose();
         }

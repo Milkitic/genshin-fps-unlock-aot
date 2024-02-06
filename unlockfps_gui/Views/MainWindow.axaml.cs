@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -26,7 +27,7 @@ namespace UnlockFps.Gui.ViewModels
         public required Config Config { get; init; }
         public int MinimumFps { get; set; } = 1;
         public int MaximumFps { get; set; } = 420;
-        public string? PreparingLog { get; set; } 
+        public string? PreparingLog { get; set; }
 
         public ICommand OpenInitializationWindowCommand { get; } =
             ReactiveCommand.CreateFromTask(ShowWindow<InitializationWindow>);
@@ -85,19 +86,26 @@ namespace UnlockFps.Gui.Views
             }
 
             _trayIcon = TrayIcon.GetIcons(Application.Current!)![0];
-            _trayIcon.Clicked += (sender, args) =>
+            _trayIcon.Clicked += (_, _) =>
             {
                 if (WindowState == WindowState.Minimized)
                 {
                     Show();
+                    WindowState = WindowState.Normal;
                 }
             };
             if (_trayIcon.Menu is { } menu)
             {
-                var items = menu.Items.Where(k => k is not NativeMenuItemSeparator)
-                    .OfType<NativeMenuItem>().ToArray();
-                items[0].Click += (sender, args) => { Show(); };
-                items[1].Click += (sender, args) => { Close(); };
+                var items = menu.Items
+                    .Where(k => k is not NativeMenuItemSeparator)
+                    .OfType<NativeMenuItem>()
+                    .ToArray();
+                items[0].Click += (_, _) =>
+                {
+                    Show();
+                    WindowState = WindowState.Normal;
+                };
+                items[1].Click += (_, _) => Close();
             }
         }
 
@@ -172,24 +180,37 @@ namespace UnlockFps.Gui.Views
 
             try
             {
-                await _processService.StartAsync((s, b) =>
+                await _processService.StartAsync((message, isError) =>
                 {
-                    _viewModel.PreparingLog = s;
-                    if (b)
-                    {
-                        Console.Error.WriteLine(s);
-                    }
+                    _viewModel.PreparingLog = message;
+                    if (isError)
+                        Console.Error.WriteLine(message);
                     else
-                    {
-                        Console.WriteLine(s);
-                    }
+                        Console.WriteLine(message);
                 });
+                _viewModel.ProcessService.PropertyChanged += ProcessServiceOnPropertyChanged;
                 _viewModel.PreparingLog = null;
                 WindowState = WindowState.Minimized;
             }
             catch (Exception ex)
             {
                 await ShowErrorMessage(ex.Message);
+            }
+
+            return;
+
+            void ProcessServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            {
+                _viewModel.ProcessService.PropertyChanged -= ProcessServiceOnPropertyChanged;
+                if (_viewModel.Config.AutoClose)
+                {
+                    Close();
+                }
+                else
+                {
+                    Show();
+                    WindowState = WindowState.Normal;
+                }
             }
         }
 
