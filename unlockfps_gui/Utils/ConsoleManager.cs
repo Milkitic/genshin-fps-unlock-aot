@@ -34,7 +34,7 @@ internal static class ConsoleManager
     private delegate bool ConsoleEventDelegate(int eventType);
     public static bool HasConsole => GetConsoleWindow() != IntPtr.Zero;
 
-    private const string Kernel32_DllName = "kernel32.dll";
+    private const string Kernel32_DllName = "kernel32";
 
     [DllImport(Kernel32_DllName)]
     private static extern bool AllocConsole();
