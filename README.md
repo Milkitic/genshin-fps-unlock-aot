@@ -1,4 +1,9 @@
 # Genshin Impact FPS Unlocker
+
+A forked version that rewrites GUI and supports linux with WINE.
+
+![image](https://github.com/Milkitic/genshin-fps-unlock-aot/assets/24785749/0d3613fb-63e6-4070-b5be-a3831610a349)
+
  - This tool helps you to unlock the 60 fps limit in the game
  - This is an external program which uses **WriteProcessMemory** to write the desired fps to the game
  - Handle protection bypass is already included
