@@ -17,7 +17,7 @@ using UnlockFps.Gui.Views;
 
 namespace UnlockFps.Gui.Services;
 
-public class ProcessService : ViewModelBase
+public class ProcessService : ViewModelBase, IDisposable
 {
     private static Native.WinEventProc _eventCallback;
 
@@ -179,14 +179,8 @@ public class ProcessService : ViewModelBase
         finally
         {
             IsRunning = false;
+            Native.CloseHandle(_gameHandle);
         }
-    }
-
-    public void OnFormClosing()
-    {
-        _pinnedCallback.Free();
-        if (_winEventHook is { } handle) Native.UnhookWinEvent(handle);
-        Native.CloseHandle(_gameHandle);
     }
 
     private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hWnd, int idObject, int idChild,
@@ -371,5 +365,22 @@ public class ProcessService : ViewModelBase
         {
             await Task.Delay(200, token);
         }
+    }
+
+    private void ReleaseUnmanagedResources()
+    {
+        _pinnedCallback.Free();
+        if (_winEventHook is { } handle) Native.UnhookWinEvent(handle);
+    }
+
+    public void Dispose()
+    {
+        ReleaseUnmanagedResources();
+        GC.SuppressFinalize(this);
+    }
+
+    ~ProcessService()
+    {
+        ReleaseUnmanagedResources();
     }
 }
