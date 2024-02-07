@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CommandLine;
+using UnlockFps.Services;
 
 namespace UnlockFps;
 
@@ -15,26 +16,23 @@ internal class Program
     static async Task Main(string[] args)
     {
         await Parser.Default.ParseArguments<Options>(args)
-            .WithParsedAsync<Options>(async o =>
+            .WithParsedAsync(async o =>
             {
-                await CreateMonitorOnly();
-                //if (o.MonitorOnly)
-                //{
-                //    await CreateMonitorOnly();
-                //}
+                if (o.MonitorOnly)
+                {
+                    await CreateMonitorOnly();
+                }
             });
 
     }
 
     private static async ValueTask CreateMonitorOnly()
     {
+        var configService = new ConfigService();
+        configService.Save();
+
         using var cts = new CancellationTokenSource();
-        var processScanner = new ProcessScanner(new Config()
-        {
-            FPSTarget = 120,
-            UsePowerSave = true,
-            GamePath = @"E:\其他文件\Genshin Impact\Genshin Impact Game\YuanShen.exe"
-        });
+        var processScanner = new ProcessScanner(configService.Config);
         Console.CancelKeyPress += (_, e) =>
         {
             e.Cancel = true;
