@@ -4,55 +4,35 @@ using System.Runtime.CompilerServices;
 
 namespace UnlockFps;
 
-public partial class Config : INotifyPropertyChanged
+public class LaunchOptions
 {
     public string? GamePath { get; set; }
 
-    public bool AutoStart { get; set; }
-    public bool AutoClose { get; set; }
-    public bool PopupWindow { get; set; }
+    public bool IsWindowBorderless { get; set; }
     public bool Fullscreen { get; set; } = true;
-    public bool UseCustomRes { get; set; }
     public bool IsExclusiveFullscreen { get; set; }
-    public bool StartMinimized { get; set; }
-    public bool UsePowerSave { get; set; }
-    public bool SuspendLoad { get; set; }
+    public bool UseCustomResolution { get; set; }
+    public int CustomResolutionX { get; set; } = 1920;
+    public int CustomResolutionY { get; set; } = 1080;
     public bool UseMobileUI { get; set; }
 
-    public int FPSTarget { get; set; } = 120;
-    public int CustomResX { get; set; } = 1920;
-    public int CustomResY { get; set; } = 1080;
-    public int MonitorNum { get; set; } = 1;
-    public int Priority { get; set; } = 3;
+    public int MonitorId { get; set; } = 1;
 
-    public bool ShowDebugConsole { get; set; }
-
+    public bool SuspendLoad { get; set; }
     public ObservableCollection<string> DllList { get; set; } = new();
+}
 
-    //public Config()
-    //{
-    //    this.PropertyChanged += Config_PropertyChanged;
-    //}
+public partial class Config : INotifyPropertyChanged
+{
+    public LaunchOptions LaunchOptions { get; set; } = new();
 
-    //private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    //{
-    //    if (e.PropertyName != nameof(ShowDebugConsole)) return;
-    //    try
-    //    {
-    //        if (ShowDebugConsole)
-    //        {
-    //            ConsoleManager.Show();
-    //        }
-    //        else
-    //        {
-    //            ConsoleManager.Hide();
-    //        }
-    //    }
-    //    catch
-    //    {
-    //        // ignored
-    //    }
-    //}
+    public bool AutoLaunch { get; set; }
+    public bool AutoClose { get; set; }
+    public bool UsePowerSave { get; set; }
+    public int FpsTarget { get; set; } = 120;
+    public int FpsPowerSave { get; set; } = 10;
+    public int ProcessPriority { get; set; } = 3;
+    public bool ShowDebugConsole { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

@@ -27,22 +27,33 @@ public class ConfigService
 
     private void StandardizeValues()
     {
-        if (!string.IsNullOrWhiteSpace(Config.GamePath))
+        if (Config.LaunchOptions == null!)
         {
-            Config.GamePath = File.Exists(Config.GamePath) ? Path.GetFullPath(Config.GamePath) : null;
+            Config.LaunchOptions = new LaunchOptions();
         }
 
-        Config.FPSTarget = Math.Clamp(Config.FPSTarget, 1, 420);
-        Config.Priority = Math.Clamp(Config.Priority, 0, 5);
-        Config.CustomResX = Math.Clamp(Config.CustomResX, 200, 7680);
-        Config.CustomResY = Math.Clamp(Config.CustomResY, 200, 4320);
-        Config.MonitorNum = Math.Clamp(Config.MonitorNum, 1, 100);
+        if (!string.IsNullOrWhiteSpace(Config.LaunchOptions.GamePath))
+        {
+            Config.LaunchOptions.GamePath = File.Exists(Config.LaunchOptions.GamePath)
+                ? Path.GetFullPath(Config.LaunchOptions.GamePath)
+                : null;
+        }
 
-        if (Config.DllList == null) Config.DllList = new ObservableCollection<string>();
+        Config.FpsTarget = Math.Clamp(Config.FpsTarget, 1, 420);
+        Config.ProcessPriority = Math.Clamp(Config.ProcessPriority, 0, 5);
+        Config.LaunchOptions.CustomResolutionX = Math.Clamp(Config.LaunchOptions.CustomResolutionX, 200, 7680);
+        Config.LaunchOptions.CustomResolutionY = Math.Clamp(Config.LaunchOptions.CustomResolutionY, 200, 4320);
+        Config.LaunchOptions.MonitorId = Math.Clamp(Config.LaunchOptions.MonitorId, 1, 100);
+        Config.FpsPowerSave = Math.Clamp(Config.FpsPowerSave, 1, 30);
+
+        if (Config.LaunchOptions.DllList == null!)
+        {
+            Config.LaunchOptions.DllList = new ObservableCollection<string>();
+        }
         else
         {
-            Config.DllList = new ObservableCollection<string>(
-                Config.DllList
+            Config.LaunchOptions.DllList = new ObservableCollection<string>(
+                Config.LaunchOptions.DllList
                     .Where(k => !string.IsNullOrWhiteSpace(k) && File.Exists(k))
                     .Select(Path.GetFullPath)
             );

@@ -42,19 +42,19 @@ public class ProcessScanner
         //SetupData(ProcessContext);
 
         _cts = new CancellationTokenSource();
-        Task.Factory.StartNew(async () =>
+        Task.Factory.StartNew(() =>
         {
-            await RunAsync(_cts.Token);
+            Run(_cts.Token);
         }, TaskCreationOptions.LongRunning);
     }
 
-    public async Task RunAsync(CancellationToken token = default)
+    public void Run(CancellationToken token = default)
     {
         while (!token.IsCancellationRequested)
         {
             try
             {
-                await CheckProcessContextAsync(token);
+                CheckProcessContextAsync(token);
                 if (!TaskUtils.TaskSleep(100, token)) return;
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ public class ProcessScanner
         }
     }
 
-    private async Task CheckProcessContextAsync(CancellationToken token)
+    private void CheckProcessContextAsync(CancellationToken token)
     {
         if (ProcessContext == null)
         {
@@ -86,7 +86,7 @@ public class ProcessScanner
 
                 try
                 {
-                    var success = await GetProcessModulesAsync(ProcessContext, CancellationToken.None);
+                    var success = GetProcessModules(ProcessContext, CancellationToken.None);
                     if (success)
                     {
                         SetupData(ProcessContext);
@@ -135,7 +135,7 @@ public class ProcessScanner
         return false;
     }
 
-    private async ValueTask<bool> GetProcessModulesAsync(ProcessContext processContext, CancellationToken token)
+    private bool GetProcessModules(ProcessContext processContext, CancellationToken token)
     {
         int retryCount = 0;
 
@@ -276,11 +276,11 @@ public class ProcessScanner
         int fpsTarget;
         if (UnsafeMethods.GetForegroundWindow() == context.CurrentProcess.MainWindowHandle)
         {
-            fpsTarget = _config.FPSTarget;
+            fpsTarget = _config.FpsTarget;
         }
         else
         {
-            fpsTarget = _config.UsePowerSave ? 10 : _config.FPSTarget;
+            fpsTarget = _config.UsePowerSave ? _config.FpsPowerSave : _config.FpsTarget;
         }
 
         Span<byte> buffer = stackalloc byte[4];
