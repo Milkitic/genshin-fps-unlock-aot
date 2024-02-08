@@ -54,7 +54,7 @@ internal class Program
             Environment.Exit(0);
         };
         Logger.LogInformation("Monitor mode. Press 'Ctrl+C' to exit.");
-        processScanner.Start(true);
+        processScanner.Start();
         while (Console.ReadLine() != "exit")
         {
 
@@ -76,6 +76,13 @@ internal class Program
             processScanner.Stop();
             Environment.Exit(0);
         };
-        processScanner.Start(true);
+        processScanner.Start();
+        while (Console.ReadLine() != "exit")
+        {
+
+        }
+
+        processScanner.Stop();
+        Environment.Exit(0);
     }
 }

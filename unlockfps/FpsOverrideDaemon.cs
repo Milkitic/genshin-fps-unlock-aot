@@ -28,6 +28,7 @@ public class FpsOverrideDaemon : IDisposable
         ProcessPriorityClass.Idle
     ];
 
+    private readonly SynchronizationContext _hwndSynchronizationContext = new SingleSynchronizationContext("HWND Thread", true);
     private readonly SynchronizationContext _synchronizationContext = new SingleSynchronizationContext("WinEventHook Callback");
 
     public FpsOverrideDaemon(Config config)
@@ -38,7 +39,7 @@ public class FpsOverrideDaemon : IDisposable
     public ProcessContext? ProcessContext { get; private set; }
 
     // https://blog.walterlv.com/post/monitor-foreground-window-on-windows
-    public void Start(bool enableMessageLoop = false)
+    public void Start()
     {
         if (_winEventHook != default)
         {
@@ -46,20 +47,38 @@ public class FpsOverrideDaemon : IDisposable
         }
 
         Logger.LogInformation("Attempting to find game window...");
-        _winEventHook = SetWinEventHook(
-            EVENT_SYSTEM_FOREGROUND,
-            EVENT_SYSTEM_FOREGROUND,
-            HMODULE.Null,
-            WinEventProc,
-            0,
-            0,
-            WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
-        );
-
-        if (enableMessageLoop && GetMessage(out var lpMsg, default, default, default))
+        if (SynchronizationContext.Current == null)
         {
-            TranslateMessage(in lpMsg);
-            DispatchMessage(in lpMsg);
+            _hwndSynchronizationContext.Post(_ =>
+            {
+                _winEventHook = SetWinEventHook(
+                    EVENT_SYSTEM_FOREGROUND,
+                    EVENT_SYSTEM_FOREGROUND,
+                    HMODULE.Null,
+                    WinEventProc,
+                    0,
+                    0,
+                    WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
+                );
+
+                if (GetMessage(out var lpMsg, default, default, default))
+                {
+                    TranslateMessage(in lpMsg);
+                    DispatchMessage(in lpMsg);
+                }
+            }, null);
+        }
+        else
+        {
+            _winEventHook = SetWinEventHook(
+                EVENT_SYSTEM_FOREGROUND,
+                EVENT_SYSTEM_FOREGROUND,
+                HMODULE.Null,
+                WinEventProc,
+                0,
+                0,
+                WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
+            );
         }
 
         var win32Window = new Win32Window(GetForegroundWindow());
@@ -68,9 +87,22 @@ public class FpsOverrideDaemon : IDisposable
 
     public void Stop()
     {
-        if (!_winEventHook.IsNull && UnhookWinEvent(_winEventHook))
+        if (SynchronizationContext.Current == null)
         {
-            _winEventHook = default;
+            _hwndSynchronizationContext.Post(_ =>
+            {
+                if (!_winEventHook.IsNull && UnhookWinEvent(_winEventHook))
+                {
+                    _winEventHook = default;
+                }
+            }, null);
+        }
+        else
+        {
+            if (!_winEventHook.IsNull && UnhookWinEvent(_winEventHook))
+            {
+                _winEventHook = default;
+            }
         }
 
         ProcessContext?.CancellationTokenSource.Cancel();
