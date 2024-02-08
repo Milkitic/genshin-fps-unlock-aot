@@ -37,7 +37,7 @@ internal class Program
                 }
                 else
                 {
-                    CreateProcessWithMonitor();
+                    await CreateProcessWithMonitor();
                 }
             });
     }
@@ -48,42 +48,56 @@ internal class Program
         configService.Save();
 
         using var cts = new CancellationTokenSource();
-        var processScanner = new FpsOverrideDaemon(configService);
+        var fpsDaemon = new FpsDaemon(configService);
         Console.CancelKeyPress += (_, e) =>
         {
-            processScanner.Stop();
-            Environment.Exit(0);
+            Exit(fpsDaemon);
         };
         Logger.LogInformation("Monitor mode. Press 'Ctrl+C' to exit.");
-        processScanner.Start();
+        fpsDaemon.Start();
         while (Console.ReadLine() != "exit")
         {
 
         }
 
-        processScanner.Stop();
-        Environment.Exit(0);
+        Exit(fpsDaemon);
     }
 
-    private static void CreateProcessWithMonitor()
+    private static async ValueTask CreateProcessWithMonitor()
     {
         var configService = new ConfigService();
         configService.Save();
 
         using var cts = new CancellationTokenSource();
-        var processScanner = new FpsOverrideDaemon(configService);
+        var fpsDaemon = new FpsDaemon(configService);
+        fpsDaemon.Start();
+
+        var processService = new ProcessService(configService);
+        processService.Start();
+
+        fpsDaemon.ProcessExit += (p) =>
+        {
+            Exit(fpsDaemon);
+        };
         Console.CancelKeyPress += (_, e) =>
         {
-            processScanner.Stop();
-            Environment.Exit(0);
+            processService.KillLastProcess();
+            Exit(fpsDaemon);
         };
-        processScanner.Start();
+
+
         while (Console.ReadLine() != "exit")
         {
 
         }
 
-        processScanner.Stop();
+        processService.KillLastProcess();
+        Exit(fpsDaemon);
+    }
+
+    private static void Exit(FpsDaemon fpsDaemon)
+    {
+        fpsDaemon.Stop();
         Environment.Exit(0);
     }
 }

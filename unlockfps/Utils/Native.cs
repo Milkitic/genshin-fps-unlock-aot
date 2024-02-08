@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace UnlockFps.Utils;
@@ -108,6 +109,26 @@ internal class ModuleGuard(IntPtr module) : IDisposable
     {
         if (this)
             Native.FreeLibrary(BaseAddress);
+    }
+}
+
+internal class ThreadGuard(IntPtr module) : IDisposable
+{
+    public IntPtr Handle { get; private set; } = module;
+
+    public static implicit operator ThreadGuard(IntPtr module) => new(module & ~3);
+    public static implicit operator IntPtr(ThreadGuard guard) => guard.Handle;
+    public static implicit operator bool(ThreadGuard guard) => guard.Handle != IntPtr.Zero;
+
+    public void Dispose()
+    {
+        if (!this) return;
+
+        if (!Native.CloseHandle(Handle))
+        {
+            throw new Win32Exception(Marshal.GetLastWin32Error(),
+                $"CloseHandle failed. ({Marshal.GetLastPInvokeErrorMessage()})");
+        }
     }
 }
 

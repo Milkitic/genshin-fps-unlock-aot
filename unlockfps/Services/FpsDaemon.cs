@@ -12,9 +12,11 @@ using static Windows.Win32.PInvoke;
 namespace UnlockFps.Services;
 
 [SupportedOSPlatform("windows5.0")]
-public class FpsOverrideDaemon : IDisposable
+public class FpsDaemon : IDisposable
 {
-    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(FpsOverrideDaemon));
+    public event Action<Process>? ProcessExit;
+
+    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(FpsDaemon));
 
     private readonly Config _config;
 
@@ -33,7 +35,7 @@ public class FpsOverrideDaemon : IDisposable
     private SynchronizationContext? _hwndSynchronizationContext;
     private readonly SynchronizationContext _synchronizationContext = new SingleSynchronizationContext("WinEventHook Callback");
 
-    public FpsOverrideDaemon(ConfigService configService)
+    public FpsDaemon(ConfigService configService)
     {
         _config = configService.Config;
     }
@@ -169,6 +171,7 @@ public class FpsOverrideDaemon : IDisposable
                 Logger.LogInformation($"Process exit: {Context.Win32Window.ProcessName}");
             }
 
+            ProcessExit?.Invoke(Context.CurrentProcess);
             Context.Dispose();
             Context = null;
         }
@@ -282,7 +285,7 @@ public class FpsOverrideDaemon : IDisposable
         }
 
         Span<byte> buffer = stackalloc byte[4];
-        var readProcessMemory = Utils.NativeMethods.ReadProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress,
+        var readProcessMemory = NativeMethods.ReadProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress,
             buffer, 4, out var readBytes);
         if (!readProcessMemory || readBytes != 4) return;
 
@@ -290,7 +293,7 @@ public class FpsOverrideDaemon : IDisposable
         if (currentFps == fpsTarget) return;
 
         var toWrite = BitConverter.GetBytes(fpsTarget);
-        if (Utils.NativeMethods.WriteProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress, toWrite, 4, out _))
+        if (NativeMethods.WriteProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress, toWrite, 4, out _))
         {
             Logger.LogInformation($"FPS Override: {currentFps} -> {fpsTarget}");
         }

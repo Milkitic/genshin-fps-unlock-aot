@@ -1,10 +1,12 @@
-﻿DispatchMessage
+﻿CreateProcess
+DispatchMessage
 GetClassName
 GetForegroundWindow
 GetMessage
 GetProcessImageFileName
 GetWindowText
 GetWindowThreadProcessId
+ResumeThread
 SetWinEventHook
 TranslateMessage
 
