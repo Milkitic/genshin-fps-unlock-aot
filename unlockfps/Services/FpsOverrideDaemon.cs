@@ -3,11 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using Milki.Extensions.Threading;
+using UnlockFps.Utils;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Accessibility;
+
 using static Windows.Win32.PInvoke;
 
-namespace UnlockFps;
+namespace UnlockFps.Services;
 
 [SupportedOSPlatform("windows5.0")]
 public class FpsOverrideDaemon : IDisposable
@@ -28,27 +30,27 @@ public class FpsOverrideDaemon : IDisposable
         ProcessPriorityClass.Idle
     ];
 
-    private readonly SynchronizationContext _hwndSynchronizationContext = new SingleSynchronizationContext("HWND Thread", true);
+    private SynchronizationContext? _hwndSynchronizationContext;
     private readonly SynchronizationContext _synchronizationContext = new SingleSynchronizationContext("WinEventHook Callback");
 
-    public FpsOverrideDaemon(Config config)
+    public FpsOverrideDaemon(ConfigService configService)
     {
-        _config = config;
+        _config = configService.Config;
     }
 
-    public ProcessContext? ProcessContext { get; private set; }
+    internal ProcessContext? Context { get; private set; }
 
     // https://blog.walterlv.com/post/monitor-foreground-window-on-windows
     public void Start()
     {
-        if (_winEventHook != default)
-        {
-            return;
-        }
+        if (_winEventHook != default) return;
 
         Logger.LogInformation("Attempting to find game window...");
+
         if (SynchronizationContext.Current == null)
         {
+            _hwndSynchronizationContext ??= new SingleSynchronizationContext("HWND Thread", true);
+            SynchronizationContext.SetSynchronizationContext(_hwndSynchronizationContext);
             _hwndSynchronizationContext.Post(_ =>
             {
                 _winEventHook = SetWinEventHook(
@@ -89,7 +91,7 @@ public class FpsOverrideDaemon : IDisposable
     {
         if (SynchronizationContext.Current == null)
         {
-            _hwndSynchronizationContext.Post(_ =>
+            _hwndSynchronizationContext?.Post(_ =>
             {
                 if (!_winEventHook.IsNull && UnhookWinEvent(_winEventHook))
                 {
@@ -105,13 +107,13 @@ public class FpsOverrideDaemon : IDisposable
             }
         }
 
-        ProcessContext?.CancellationTokenSource.Cancel();
+        Context?.CancellationTokenSource.Cancel();
     }
 
     private void WinEventProc(HWINEVENTHOOK hWinEventHook, uint @event, HWND hwnd,
         int idObject, int idChild, uint idEventThread, uint dwmsEventTime)
     {
-        if (ProcessContext != null) return;
+        if (Context != null) return;
         var win32Window = new Win32Window(hwnd);
         _synchronizationContext.Send(CallBack, win32Window);
     }
@@ -120,7 +122,7 @@ public class FpsOverrideDaemon : IDisposable
     {
         if (state is not Win32Window win32Window) return;
 
-        if (ProcessContext == null)
+        if (Context == null)
         {
             var process = Process.GetProcessById((int)win32Window.ProcessId);
             if (!CheckProcess(process, out var processContext)) return;
@@ -134,16 +136,16 @@ public class FpsOverrideDaemon : IDisposable
             {
                 processContext.IsFpsApplied = true;
                 LoopApply(processContext.CancellationTokenSource.Token);
-                ProcessContext?.Dispose();
+                Context?.Dispose();
             }, TaskCreationOptions.LongRunning);
         }
         else
         {
-            ProcessContext.IsGameInForeground = ProcessContext.CurrentProcess.Id == win32Window.ProcessId;
+            Context.IsGameInForeground = Context.CurrentProcess.Id == win32Window.ProcessId;
 
             if (_config.UsePowerSave)
             {
-                ProcessContext.CurrentProcess.PriorityClass = ProcessContext.IsGameInForeground
+                Context.CurrentProcess.PriorityClass = Context.IsGameInForeground
                     ? PriorityClass[_config.ProcessPriority]
                     : ProcessPriorityClass.Idle;
             }
@@ -154,21 +156,21 @@ public class FpsOverrideDaemon : IDisposable
     {
         while (!token.IsCancellationRequested)
         {
-            if (ProcessContext is not { CurrentProcess.HasExited: false } processContext) break;
+            if (Context is not { CurrentProcess.HasExited: false } processContext) break;
 
             ApplyFpsLimit(processContext);
             if (!TaskUtils.TaskSleep(200, token)) return;
         }
 
-        if (ProcessContext != null)
+        if (Context != null)
         {
-            if (ProcessContext.CurrentProcess.HasExited && ProcessContext.Win32Window != null)
+            if (Context.CurrentProcess.HasExited && Context.Win32Window != null)
             {
-                Logger.LogInformation($"Process exit: {ProcessContext.Win32Window.ProcessName}");
+                Logger.LogInformation($"Process exit: {Context.Win32Window.ProcessName}");
             }
 
-            ProcessContext.Dispose();
-            ProcessContext = null;
+            Context.Dispose();
+            Context = null;
         }
 
         Logger.LogInformation("Stop applying FPS.");
@@ -180,7 +182,7 @@ public class FpsOverrideDaemon : IDisposable
         if (!CheckProcessPath(process, out var fileName, out var directoryName)) return false;
         if (process.HasExited) return false;
 
-        ProcessContext = processContext = new ProcessContext
+        Context = processContext = new ProcessContext
         {
             CurrentProcess = process,
             FileName = fileName,
@@ -189,19 +191,19 @@ public class FpsOverrideDaemon : IDisposable
         try
         {
             Logger.LogInformation($"Trying to get remote module base address...");
-            var success = GetProcessModules(ProcessContext, CancellationToken.None);
+            var success = GetProcessModules(Context, CancellationToken.None);
             if (!success) return false;
             Logger.LogInformation($"Get remote module base address successfully.");
 
             Logger.LogInformation($"Trying to get FPS address...");
-            processContext.FpsValueAddress = FpsPatterns.ProvideAddress(ProcessContext.UnityPlayerModule,
+            processContext.FpsValueAddress = FpsPatterns.ProvideAddress(Context.UnityPlayerModule,
                 processContext.UserAssemblyModule, process);
             Logger.LogInformation($"Get FPS address successfully: {processContext.FpsValueAddress}");
             return true;
         }
         catch
         {
-            ProcessContext = processContext = null;
+            Context = processContext = null;
             throw;
         }
     }
@@ -280,7 +282,7 @@ public class FpsOverrideDaemon : IDisposable
         }
 
         Span<byte> buffer = stackalloc byte[4];
-        var readProcessMemory = NativeMethods.ReadProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress,
+        var readProcessMemory = Utils.NativeMethods.ReadProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress,
             buffer, 4, out var readBytes);
         if (!readProcessMemory || readBytes != 4) return;
 
@@ -288,7 +290,7 @@ public class FpsOverrideDaemon : IDisposable
         if (currentFps == fpsTarget) return;
 
         var toWrite = BitConverter.GetBytes(fpsTarget);
-        if (NativeMethods.WriteProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress, toWrite, 4, out _))
+        if (Utils.NativeMethods.WriteProcessMemory(context.CurrentProcess.Handle, context.FpsValueAddress, toWrite, 4, out _))
         {
             Logger.LogInformation($"FPS Override: {currentFps} -> {fpsTarget}");
         }
@@ -297,5 +299,35 @@ public class FpsOverrideDaemon : IDisposable
     public void Dispose()
     {
         Stop();
+    }
+
+    internal class ProcessContext : IDisposable
+    {
+        public ProcessContext()
+        {
+            CancellationTokenSource = new CancellationTokenSource();
+        }
+
+        public CancellationTokenSource CancellationTokenSource { get; }
+
+        public required Process CurrentProcess { get; init; }
+        //public required IntPtr ProcessHandle { get; init; }
+        public required string FileName { get; init; }
+        public required string DirectoryName { get; init; }
+
+        public ProcessModule UnityPlayerModule { get; set; } = null!;
+        public ProcessModule UserAssemblyModule { get; set; } = null!;
+        public bool IsFpsApplied { get; set; }
+
+        public IntPtr FpsValueAddress { get; set; }
+        public bool IsGameInForeground { get; set; }
+
+        public Win32Window? Win32Window { get; set; }
+
+        public void Dispose()
+        {
+            CancellationTokenSource.Dispose();
+            CurrentProcess?.Dispose();
+        }
     }
 }

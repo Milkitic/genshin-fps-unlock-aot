@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace UnlockFps;
+namespace UnlockFps.Utils;
 
 internal static partial class NativeMethods
 {

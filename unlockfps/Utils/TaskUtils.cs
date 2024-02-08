@@ -1,4 +1,4 @@
-﻿namespace UnlockFps;
+﻿namespace UnlockFps.Utils;
 
 public static class TaskUtils
 {

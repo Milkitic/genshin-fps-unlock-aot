@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace UnlockFps;
+namespace UnlockFps.Utils;
 
 internal class Native
 {
@@ -96,20 +96,18 @@ internal class Native
     public static extern uint RtlAdjustPrivilege(uint Privilege, bool bEnablePrivilege, bool IsThreadPrivilege, out bool PreviousValue);
 }
 
-internal readonly struct ModuleGuard(IntPtr module) : IDisposable
+internal class ModuleGuard(IntPtr module) : IDisposable
 {
-    public readonly IntPtr BaseAddress = module;
-    public bool IsInvalid => BaseAddress == IntPtr.Zero;
+    public IntPtr BaseAddress { get; private set; } = module;
 
     public static implicit operator ModuleGuard(IntPtr module) => new(module & ~3);
     public static implicit operator IntPtr(ModuleGuard guard) => guard.BaseAddress;
+    public static implicit operator bool(ModuleGuard guard) => guard.BaseAddress != IntPtr.Zero;
 
     public void Dispose()
     {
-        if (IsInvalid)
-        {
+        if (this)
             Native.FreeLibrary(BaseAddress);
-        }
     }
 }
 

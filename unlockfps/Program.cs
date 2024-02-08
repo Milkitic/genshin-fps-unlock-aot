@@ -2,6 +2,7 @@
 using CommandLine;
 using Microsoft.Extensions.Logging;
 using UnlockFps.Services;
+using UnlockFps.Utils;
 
 namespace UnlockFps;
 
@@ -47,7 +48,7 @@ internal class Program
         configService.Save();
 
         using var cts = new CancellationTokenSource();
-        var processScanner = new FpsOverrideDaemon(configService.Config);
+        var processScanner = new FpsOverrideDaemon(configService);
         Console.CancelKeyPress += (_, e) =>
         {
             processScanner.Stop();
@@ -70,7 +71,7 @@ internal class Program
         configService.Save();
 
         using var cts = new CancellationTokenSource();
-        var processScanner = new FpsOverrideDaemon(configService.Config);
+        var processScanner = new FpsOverrideDaemon(configService);
         Console.CancelKeyPress += (_, e) =>
         {
             processScanner.Stop();

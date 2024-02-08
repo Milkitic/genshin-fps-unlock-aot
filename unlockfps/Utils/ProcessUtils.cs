@@ -1,11 +1,11 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace UnlockFps;
+namespace UnlockFps.Utils;
 
 internal class ProcessUtils
 {
-    public static string GetProcessPathFromPid(uint pid, out IntPtr processHandle)
+    public static string GetProcessPathFromPid(uint pid, out nint processHandle)
     {
         var hProcess = Native.OpenProcess(
             ProcessAccess.QUERY_LIMITED_INFORMATION |
@@ -14,7 +14,7 @@ internal class ProcessUtils
 
         processHandle = hProcess;
 
-        if (hProcess == IntPtr.Zero)
+        if (hProcess == nint.Zero)
             return string.Empty;
 
         StringBuilder sb = new StringBuilder(1024);
@@ -25,7 +25,7 @@ internal class ProcessUtils
         return sb.ToString();
     }
 
-    public static bool InjectDlls(IntPtr processHandle, IReadOnlyList<string> dllPaths)
+    public static bool InjectDlls(nint processHandle, IReadOnlyList<string> dllPaths)
     {
         if (dllPaths.Count == 0)
             return true;
@@ -35,9 +35,9 @@ internal class ProcessUtils
         var kernel32 = Native.LoadLibrary("kernel32.dll");
         var loadLibrary = Native.GetProcAddress(kernel32, "LoadLibraryW");
 
-        var remoteVa = Native.VirtualAllocEx(processHandle, IntPtr.Zero, 0x1000,
+        var remoteVa = Native.VirtualAllocEx(processHandle, nint.Zero, 0x1000,
             AllocationType.COMMIT | AllocationType.RESERVE, MemoryProtection.READWRITE);
-        if (remoteVa == IntPtr.Zero)
+        if (remoteVa == nint.Zero)
             return false;
 
         foreach (var dllPath in dllPaths)
@@ -49,8 +49,8 @@ internal class ProcessUtils
             if (!Native.WriteProcessMemory(processHandle, remoteVa, bytes, bytes.Length, out var bytesWritten))
                 return false;
 
-            var thread = Native.CreateRemoteThread(processHandle, IntPtr.Zero, 0, loadLibrary, remoteVa, 0, out var threadId);
-            if (thread == IntPtr.Zero)
+            var thread = Native.CreateRemoteThread(processHandle, nint.Zero, 0, loadLibrary, remoteVa, 0, out var threadId);
+            if (thread == nint.Zero)
                 return false;
 
             Native.WaitForSingleObject(thread, uint.MaxValue);
@@ -63,7 +63,7 @@ internal class ProcessUtils
         return true;
     }
 
-    public static unsafe IntPtr PatternScan(IntPtr module, string signature)
+    public static unsafe nint PatternScan(nint module, string signature)
     {
         var dosHeader = Marshal.PtrToStructure<IMAGE_DOS_HEADER>(module);
         var ntHeader = Marshal.PtrToStructure<IMAGE_NT_HEADERS>((nint)(module.ToInt64() + dosHeader.e_lfanew));
@@ -78,20 +78,20 @@ internal class ProcessUtils
             return (nint)(module.ToInt64() + result.Offset);
         }
 
-        return IntPtr.Zero;
+        return nint.Zero;
     }
 
-    public static IntPtr GetModuleBase(IntPtr hProcess, string moduleName)
+    public static nint GetModuleBase(nint hProcess, string moduleName)
     {
-        var modules = new IntPtr[1024];
+        var modules = new nint[1024];
 
-        if (!Native.EnumProcessModules(hProcess, modules, (uint)(modules.Length * IntPtr.Size), out var bytesNeeded))
+        if (!Native.EnumProcessModules(hProcess, modules, (uint)(modules.Length * nint.Size), out var bytesNeeded))
         {
             if (Marshal.GetLastWin32Error() != 299)
-                return IntPtr.Zero;
+                return nint.Zero;
         }
 
-        foreach (var module in modules.Where(x => x != IntPtr.Zero))
+        foreach (var module in modules.Where(x => x != nint.Zero))
         {
             StringBuilder sb = new StringBuilder(1024);
             if (Native.GetModuleBaseName(hProcess, module, sb, (uint)sb.Capacity) == 0)
@@ -106,6 +106,6 @@ internal class ProcessUtils
             return moduleInfo.lpBaseOfDll;
         }
 
-        return IntPtr.Zero;
+        return nint.Zero;
     }
 }
