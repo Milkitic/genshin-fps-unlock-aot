@@ -99,14 +99,14 @@ internal class Native
 internal readonly struct ModuleGuard(IntPtr module) : IDisposable
 {
     public readonly IntPtr BaseAddress = module;
-    public bool LoadSuccess => BaseAddress != IntPtr.Zero;
+    public bool IsInvalid => BaseAddress == IntPtr.Zero;
 
     public static implicit operator ModuleGuard(IntPtr module) => new(module & ~3);
     public static implicit operator IntPtr(ModuleGuard guard) => guard.BaseAddress;
 
     public void Dispose()
     {
-        if (LoadSuccess)
+        if (IsInvalid)
         {
             Native.FreeLibrary(BaseAddress);
         }

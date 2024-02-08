@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CommandLine;
+using Microsoft.Extensions.Logging;
 using UnlockFps.Services;
 
 namespace UnlockFps;
@@ -12,33 +13,69 @@ internal class Program
         public bool MonitorOnly { get; set; }
     }
 
+    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(Program));
+
+    [STAThread]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(Options))]
     static async Task Main(string[] args)
     {
+        LogUtils.LoggerFactory = LoggerFactory.Create(builder => builder
+            .AddSimpleConsole(options =>
+            {
+                options.SingleLine = true;
+                options.TimestampFormat = "[HH:mm:ss.fff] ";
+            })
+            .AddFilter(_ => true)
+        );
         await Parser.Default.ParseArguments<Options>(args)
             .WithParsedAsync(async o =>
             {
                 if (o.MonitorOnly)
                 {
-                    await CreateMonitorOnly();
+                    CreateMonitorOnly();
+                }
+                else
+                {
+                    CreateProcessWithMonitor();
                 }
             });
-
     }
 
-    private static async ValueTask CreateMonitorOnly()
+    private static void CreateMonitorOnly()
     {
         var configService = new ConfigService();
         configService.Save();
 
         using var cts = new CancellationTokenSource();
-        var processScanner = new ProcessScanner(configService.Config);
+        var processScanner = new FpsOverrideDaemon(configService.Config);
         Console.CancelKeyPress += (_, e) =>
         {
-            e.Cancel = true;
-            cts.Cancel();
+            processScanner.Stop();
+            Environment.Exit(0);
         };
-        Console.WriteLine("Monitor mode. Press 'Ctrl+C' to exit.");
-        await processScanner.RunAsync(cts.Token);
+        Logger.LogInformation("Monitor mode. Press 'Ctrl+C' to exit.");
+        processScanner.Start(true);
+        while (Console.ReadLine() != "exit")
+        {
+
+        }
+
+        processScanner.Stop();
+        Environment.Exit(0);
+    }
+
+    private static void CreateProcessWithMonitor()
+    {
+        var configService = new ConfigService();
+        configService.Save();
+
+        using var cts = new CancellationTokenSource();
+        var processScanner = new FpsOverrideDaemon(configService.Config);
+        Console.CancelKeyPress += (_, e) =>
+        {
+            processScanner.Stop();
+            Environment.Exit(0);
+        };
+        processScanner.Start(true);
     }
 }

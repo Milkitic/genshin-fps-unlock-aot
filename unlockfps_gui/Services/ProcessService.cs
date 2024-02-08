@@ -1,8 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -13,7 +9,6 @@ using System.Threading.Tasks;
 using UnlockFps.Gui.Model;
 using UnlockFps.Gui.Utils;
 using UnlockFps.Gui.ViewModels;
-using UnlockFps.Gui.Views;
 
 namespace UnlockFps.Gui.Services;
 

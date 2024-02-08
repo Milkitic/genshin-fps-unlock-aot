@@ -1,0 +1,13 @@
+﻿DispatchMessage
+GetClassName
+GetForegroundWindow
+GetMessage
+GetProcessImageFileName
+GetWindowText
+GetWindowThreadProcessId
+SetWinEventHook
+TranslateMessage
+
+EVENT_SYSTEM_FOREGROUND
+WINEVENT_OUTOFCONTEXT
+WINEVENT_SKIPOWNPROCESS

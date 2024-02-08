@@ -75,7 +75,7 @@ namespace UnlockFps.Gui.Utils
                 .ToArray();
 
             var dosHeader = Marshal.PtrToStructure<IMAGE_DOS_HEADER>(module);
-            var ntHeader = Marshal.PtrToStructure<IMAGE_NT_HEADERS>((IntPtr)(module.ToInt64() + dosHeader.e_lfanew));
+            var ntHeader = Marshal.PtrToStructure<IMAGE_NT_HEADERS>((nint)(module.ToInt64() + dosHeader.e_lfanew));
 
             var sizeOfImage = ntHeader.OptionalHeader.SizeOfImage;
             var scanBytes = (byte*)module;
@@ -96,7 +96,7 @@ namespace UnlockFps.Gui.Utils
                 }
 
                 if (found)
-                    return (IntPtr)(module.ToInt64() + i);
+                    return (nint)(module.ToInt64() + i);
             }
 
             return IntPtr.Zero;
