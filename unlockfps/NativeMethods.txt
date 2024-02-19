@@ -13,3 +13,8 @@ TranslateMessage
 EVENT_SYSTEM_FOREGROUND
 WINEVENT_OUTOFCONTEXT
 WINEVENT_SKIPOWNPROCESS
+
+OpenProcess
+QueryFullProcessImageName
+
+EnumWindows

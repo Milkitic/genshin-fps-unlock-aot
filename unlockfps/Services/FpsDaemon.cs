@@ -35,6 +35,9 @@ public class FpsDaemon : IDisposable
     private SynchronizationContext? _hwndSynchronizationContext;
     private readonly SynchronizationContext _synchronizationContext = new SingleSynchronizationContext("WinEventHook Callback");
 
+    private WINEVENTPROC _eventCallBack;
+    private Timer _timer;
+
     public FpsDaemon(ConfigService configService)
     {
         _config = configService.Config;
@@ -47,43 +50,44 @@ public class FpsDaemon : IDisposable
     {
         if (_winEventHook != default) return;
 
-        Logger.LogInformation("Attempting to find game window...");
-
         if (SynchronizationContext.Current == null)
         {
             _hwndSynchronizationContext ??= new SingleSynchronizationContext("HWND Thread", true);
             SynchronizationContext.SetSynchronizationContext(_hwndSynchronizationContext);
-            _hwndSynchronizationContext.Post(_ =>
+        }
+
+        SynchronizationContext.Current!.Post(a =>
+        {
+            Logger.LogInformation($"[{Thread.CurrentThread.Name}] Attempting to find game window...");
+
+            if (WineHelper.DetectWine(out _, out _) || _config.UseQueryEvent)
             {
+                _eventCallBack = WinEventProc;
                 _winEventHook = SetWinEventHook(
                     EVENT_SYSTEM_FOREGROUND,
                     EVENT_SYSTEM_FOREGROUND,
                     HMODULE.Null,
-                    WinEventProc,
+                    _eventCallBack,
                     0,
                     0,
                     WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
                 );
-
+                if (_hwndSynchronizationContext == null) return;
                 if (GetMessage(out var lpMsg, default, default, default))
                 {
                     TranslateMessage(in lpMsg);
                     DispatchMessage(in lpMsg);
                 }
-            }, null);
-        }
-        else
-        {
-            _winEventHook = SetWinEventHook(
-                EVENT_SYSTEM_FOREGROUND,
-                EVENT_SYSTEM_FOREGROUND,
-                HMODULE.Null,
-                WinEventProc,
-                0,
-                0,
-                WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
-            );
-        }
+            }
+            else
+            {
+                _timer = new Timer(_ =>
+                {
+                    var win32Window = new Win32Window(GetForegroundWindow());
+                    _synchronizationContext.Send(CallBack, win32Window);
+                }, null, 1000, 1000);
+            }
+        }, null);
 
         var win32Window = new Win32Window(GetForegroundWindow());
         _synchronizationContext.Send(CallBack, win32Window);
@@ -91,7 +95,7 @@ public class FpsDaemon : IDisposable
 
     public void Stop()
     {
-        if (SynchronizationContext.Current == null)
+        if (_hwndSynchronizationContext != null)
         {
             _hwndSynchronizationContext?.Post(_ =>
             {
@@ -109,6 +113,8 @@ public class FpsDaemon : IDisposable
             }
         }
 
+        _eventCallBack = default;
+        _timer?.Dispose();
         Context?.CancellationTokenSource.Cancel();
     }
 
@@ -122,22 +128,46 @@ public class FpsDaemon : IDisposable
 
     private void CallBack(object? state)
     {
-        if (state is not Win32Window win32Window) return;
+        try
+        {
+            if (state is not Win32Window win32Window) return;
+            ApplyContext(win32Window);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("WinEventHook Callback Error:" + ex);
+            throw;
+        }
+    }
 
+    private void ApplyContext(Win32Window win32Window)
+    {
         if (Context == null)
         {
+            if (win32Window.ProcessId == 0)
+            {
+                Logger.LogInformation($"Invalid window: {win32Window.Handle}");
+                return;
+            }
+
+            var text =
+                $"[0x{win32Window.Handle:X16} {win32Window.ClassName}] ({win32Window.ProcessId} {win32Window.ProcessName}.exe) {win32Window.Title}";
             var process = Process.GetProcessById((int)win32Window.ProcessId);
-            if (!CheckProcess(process, out var processContext)) return;
+            if (!CheckProcess(process, out var processContext))
+            {
+                Logger.LogInformation($"Invalid window: {text}");
+                return;
+            }
+
             processContext.Win32Window = win32Window;
 
-            var text = $"[0x{win32Window.Handle:X16} {win32Window.ClassName}] ({win32Window.ProcessId} {win32Window.ProcessName}.exe) {win32Window.Title}";
             Logger.LogInformation($"Find the game window: {text}");
             Logger.LogInformation("Start applying FPS.");
 
             Task.Factory.StartNew(() =>
             {
                 processContext.IsFpsApplied = true;
-                LoopApply(processContext.CancellationTokenSource.Token);
+                ApplyFpsLoop(processContext.CancellationTokenSource.Token);
                 Context?.Dispose();
             }, TaskCreationOptions.LongRunning);
         }
@@ -154,7 +184,7 @@ public class FpsDaemon : IDisposable
         }
     }
 
-    private void LoopApply(CancellationToken token)
+    private void ApplyFpsLoop(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
