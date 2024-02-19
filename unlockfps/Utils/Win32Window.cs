@@ -3,11 +3,12 @@ using System.Diagnostics;
 using System.Runtime.Versioning;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.System.Threading;
 
 namespace UnlockFps.Utils;
 
 [SupportedOSPlatform("windows5.0")]
-internal class Win32Window
+public class Win32Window
 {
     private readonly HWND _hWnd;
     private string? _className;
@@ -15,7 +16,7 @@ internal class Win32Window
     private string? _processName;
     private uint _pid;
 
-    internal Win32Window(nint handle)
+    public Win32Window(nint handle)
     {
         _hWnd = (HWND)handle;
     }
@@ -27,8 +28,45 @@ internal class Win32Window
     public string Title => _title ??= CallWin32ToGetPWSTR(512, (p, l) => PInvoke.GetWindowText(_hWnd, p, l));
 
     public uint ProcessId => _pid is 0 ? (_pid = GetProcessIdCore()) : _pid;
+    
+    //public string ProcessName => _processName ??= Process.GetProcessById((int)ProcessId).ProcessName;
+    public unsafe string ProcessName
+    {
+        get
+        {
+            if (_processName == null)
+            {
+                var hProcess =
+                    PInvoke.OpenProcess(
+                        PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION |
+                        PROCESS_ACCESS_RIGHTS.PROCESS_TERMINATE | PROCESS_ACCESS_RIGHTS.PROCESS_SYNCHRONIZE, false,
+                        ProcessId);
+                try
+                {
+                    uint bufferSize = 512;
+                    Span<char> span = stackalloc char[(int)bufferSize];
 
-    public string ProcessName => _processName ??= Process.GetProcessById((int)ProcessId).ProcessName;
+                    fixed (char* o = span)
+                    {
+                        if (!PInvoke.QueryFullProcessImageName(hProcess, 0, new PWSTR(o), &bufferSize))
+                        {
+                            return "";
+                        }
+                    }
+
+                    var path = new string(span.Slice(0, (int)bufferSize));
+                    var processName = Path.GetFileNameWithoutExtension(path);
+                    _processName = processName;
+                }
+                finally
+                {
+                    PInvoke.CloseHandle(hProcess);
+                }
+            }
+
+            return _processName;
+        }
+    }
 
     private unsafe uint GetProcessIdCore()
     {
