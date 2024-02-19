@@ -52,16 +52,25 @@ public class FpsDaemon : IDisposable
 
         if (SynchronizationContext.Current == null)
         {
-            _hwndSynchronizationContext ??= new SingleSynchronizationContext("HWND Thread", true);
+            _hwndSynchronizationContext ??= new SingleSynchronizationContext("HWND SynchronizationContext", true);
             SynchronizationContext.SetSynchronizationContext(_hwndSynchronizationContext);
+            _hwndSynchronizationContext.Post(_ =>
+            {
+                Thread.CurrentThread.Name = "HWND SynchronizationContext";
+            }, null);
         }
 
         SynchronizationContext.Current!.Post(a =>
         {
-            Logger.LogInformation($"[{Thread.CurrentThread.Name}] Attempting to find game window...");
-
-            if (WineHelper.DetectWine(out _, out _) || _config.UseQueryEvent)
+            if (string.IsNullOrEmpty(Thread.CurrentThread.Name))
             {
+                Thread.CurrentThread.Name = "Default SynchronizationContext";
+            }
+
+            if (!WineHelper.DetectWine(out _, out _) && _config.WindowQueryUseEvent)
+            {
+                Logger.LogInformation($"[{Thread.CurrentThread.Name}] Attempting to find game window (Event Mode)");
+
                 _eventCallBack = WinEventProc;
                 _winEventHook = SetWinEventHook(
                     EVENT_SYSTEM_FOREGROUND,
@@ -81,11 +90,19 @@ public class FpsDaemon : IDisposable
             }
             else
             {
+                Logger.LogInformation($"[{Thread.CurrentThread.Name}] Attempting to find game window (Timer Mode)");
+
+                nint lastWindow = 0;
                 _timer = new Timer(_ =>
                 {
-                    var win32Window = new Win32Window(GetForegroundWindow());
-                    _synchronizationContext.Send(CallBack, win32Window);
-                }, null, 1000, 1000);
+                    var foregroundWindow = GetForegroundWindow();
+                    if (lastWindow != foregroundWindow)
+                    {
+                        var win32Window = new Win32Window(foregroundWindow);
+                        _synchronizationContext.Send(CallBack, win32Window);
+                        lastWindow = foregroundWindow;
+                    }
+                }, null, 500, 500);
             }
         }, null);
 
