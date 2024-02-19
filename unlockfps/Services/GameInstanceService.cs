@@ -3,12 +3,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
-using Microsoft.Extensions.Logging;
 using Milki.Extensions.Threading;
+using UnlockFps.Logging;
 using UnlockFps.Utils;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Accessibility;
-
 using static Windows.Win32.PInvoke;
 
 namespace UnlockFps.Services;
@@ -18,7 +17,7 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
 {
     public event Action<Process>? ProcessExit;
 
-    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(GameInstanceService));
+    private static readonly ILogger Logger = LogManager.GetLogger(nameof(GameInstanceService));
 
     private readonly Config _config;
 
@@ -181,7 +180,7 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
         {
             if (win32Window.ProcessId == 0)
             {
-                Logger.LogInformation($"Invalid window: {win32Window.Handle}");
+                Logger.LogDebug($"Invalid window: {win32Window.Handle}");
                 return;
             }
 
@@ -190,7 +189,7 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
             var process = Process.GetProcessById((int)win32Window.ProcessId);
             if (!CheckProcess(process, out var processContext))
             {
-                Logger.LogInformation($"Invalid window: {text}");
+                Logger.LogDebug($"Invalid window: {text}");
                 return;
             }
 
@@ -331,7 +330,7 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
 
             if (!TaskUtils.TaskSleep(500, token)) break;
             retryCount++;
-            Logger.LogDebug($"({retryCount}) Trying to get remote module base address...", false);
+            Logger.LogDebug($"({retryCount}) Trying to get remote module base address...");
         }
 
         return processContext is { UnityPlayerModule: not null, UserAssemblyModule: not null };

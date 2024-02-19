@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
-using Microsoft.Extensions.Logging;
+using UnlockFps.Logging;
 using UnlockFps.Utils;
 using Windows.Win32.System.Threading;
 
@@ -16,7 +16,7 @@ namespace UnlockFps.Services;
 [SupportedOSPlatform("windows5.1.2600")]
 public class ProcessService
 {
-    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(ProcessService));
+    private static readonly ILogger Logger = LogManager.GetLogger(nameof(ProcessService));
 
     private readonly Config _config;
     private int _lastProcessId;

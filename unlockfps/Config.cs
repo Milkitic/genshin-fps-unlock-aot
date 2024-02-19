@@ -1,10 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace UnlockFps;
 
-public class LaunchOptions
+public partial class LaunchOptions : INotifyPropertyChanged
 {
     public string? GamePath { get; set; }
 
@@ -22,7 +21,7 @@ public class LaunchOptions
     public ObservableCollection<string> DllList { get; set; } = new();
 }
 
-public class Config : INotifyPropertyChanged
+public partial class Config : INotifyPropertyChanged
 {
     public LaunchOptions LaunchOptions { get; set; } = new();
 
@@ -34,19 +33,4 @@ public class Config : INotifyPropertyChanged
     public int ProcessPriority { get; set; } = 3;
     public bool ShowDebugConsole { get; set; }
     public bool WindowQueryUseEvent { get; set; } = true;
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
 }

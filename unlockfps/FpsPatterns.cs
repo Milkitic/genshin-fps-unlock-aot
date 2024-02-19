@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.Logging;
+using UnlockFps.Logging;
 using UnlockFps.Utils;
 
 namespace UnlockFps;
 
 internal static class FpsPatterns
 {
-    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(FpsPatterns));
+    private static readonly ILogger Logger = LogManager.GetLogger(nameof(FpsPatterns));
 
     public static unsafe nint ProvideAddress(ProcessModule mdUnityPlayer, ProcessModule mdUserAssembly, Process process)
     {
