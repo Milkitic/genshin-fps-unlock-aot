@@ -24,11 +24,11 @@
         <TabControl Grid.Row="1" SelectedIndex="0">
             <TabItem Header="General">
                 <StackPanel>
-                    <ToggleSwitch
+                    <!--<ToggleSwitch
                         IsChecked="{Binding Config.StartMinimized}"
                         OffContent="Start minimized (Unlocker)"
                         OnContent="Start minimized (Unlocker)"
-                        ToolTip.Tip="Unlocker will be minimized to tray during startup." />
+                        ToolTip.Tip="Unlocker will be minimized to tray during startup." />-->
                     <ToggleSwitch
                         IsChecked="{Binding Config.AutoClose}"
                         OffContent="Close automatically"
@@ -49,7 +49,7 @@
                             Grid.Column="1"
                             Margin="5,0,0,0"
                             HorizontalAlignment="Stretch"
-                            SelectedIndex="{Binding Config.Priority}">
+                            SelectedIndex="{Binding Config.ProcessPriority}">
                             <ComboBoxItem>Realtime</ComboBoxItem>
                             <ComboBoxItem>High</ComboBoxItem>
                             <ComboBoxItem>Above Normal</ComboBoxItem>
@@ -63,21 +63,21 @@
             <TabItem Header="Launch Options">
                 <StackPanel>
                     <ToggleSwitch
-                        IsChecked="{Binding Config.PopupWindow}"
-                        IsEnabled="{Binding Config.Fullscreen, Converter={x:Static BoolConverters.Not}}"
+                        IsChecked="{Binding Config.LaunchOptions.IsWindowBorderless}"
+                        IsEnabled="{Binding Config.LaunchOptions.Fullscreen, Converter={x:Static BoolConverters.Not}}"
                         OffContent="Make window borderless"
                         OnContent="Make window borderless" />
                     <ToggleSwitch
-                        IsChecked="{Binding Config.Fullscreen}"
-                        IsEnabled="{Binding Config.PopupWindow, Converter={x:Static BoolConverters.Not}}"
+                        IsChecked="{Binding Config.LaunchOptions.Fullscreen}"
+                        IsEnabled="{Binding Config.LaunchOptions.IsWindowBorderless, Converter={x:Static BoolConverters.Not}}"
                         OffContent="Fullscreen"
                         OnContent="Fullscreen" />
                     <ToggleSwitch
-                        IsChecked="{Binding Config.UseCustomRes}"
+                        IsChecked="{Binding Config.LaunchOptions.UseCustomResolution}"
                         OffContent="Use Custom Resolution"
                         OnContent="Use Custom Resolution" />
                     <ToggleSwitch
-                        IsChecked="{Binding Config.UseMobileUI}"
+                        IsChecked="{Binding Config.LaunchOptions.UseMobileUI}"
                         OffContent="Use Mobile UI"
                         OnContent="Use Mobile UI" />
 
@@ -93,11 +93,11 @@
                             Margin="5,10,0,10"
                             HorizontalAlignment="Stretch"
                             ColumnDefinitions="*,Auto,*"
-                            IsEnabled="{Binding Config.UseCustomRes}">
+                            IsEnabled="{Binding Config.LaunchOptions.UseCustomResolution}">
                             <NumericUpDown
                                 FormatString="0"
                                 Increment="1"
-                                Value="{Binding Config.CustomResX}" />
+                                Value="{Binding Config.LaunchOptions.CustomResolutionX}" />
                             <Label
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
@@ -106,7 +106,7 @@
                                 Grid.Column="2"
                                 FormatString="0"
                                 Increment="1"
-                                Value="{Binding Config.CustomResY}" />
+                                Value="{Binding Config.LaunchOptions.CustomResolutionY}" />
                         </Grid>
                         <Label
                             Grid.Row="1"
@@ -118,8 +118,8 @@
                             Grid.Column="1"
                             Margin="5,10,0,10"
                             HorizontalAlignment="Stretch"
-                            IsEnabled="{Binding Config.Fullscreen}"
-                            SelectedIndex="{Binding Config.IsExclusiveFullscreen}">
+                            IsEnabled="{Binding Config.LaunchOptions.Fullscreen}"
+                            SelectedIndex="{Binding Config.LaunchOptions.IsExclusiveFullscreen}">
                             <ComboBoxItem>Borderless</ComboBoxItem>
                             <ComboBoxItem>Exclusive</ComboBoxItem>
                         </ComboBox>
@@ -135,7 +135,7 @@
                             HorizontalAlignment="Stretch"
                             FormatString="0"
                             Increment="1"
-                            Value="{Binding Config.MonitorNum}" />
+                            Value="{Binding Config.LaunchOptions.MonitorId}" />
                     </Grid>
                 </StackPanel>
             </TabItem>
@@ -148,7 +148,7 @@
                         Margin="0,12,0,0"
                         BorderBrush="{DynamicResource TextControlBorderBrush}"
                         BorderThickness="1"
-                        ItemsSource="{Binding Config.DllList}"
+                        ItemsSource="{Binding Config.LaunchOptions.DllList}"
                         SelectedItem="{Binding SelectedDll}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -175,7 +175,7 @@
                             Command="{Binding RemoveDllCommand}"
                             Content="Remove" />
                         <ToggleSwitch
-                            IsChecked="{Binding Config.SuspendLoad}"
+                            IsChecked="{Binding Config.LaunchOptions.SuspendLoad}"
                             OffContent="Suspend Load"
                             OnContent="Suspend Load">
                             <ToolTip.Tip>

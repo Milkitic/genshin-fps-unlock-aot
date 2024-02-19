@@ -31,6 +31,7 @@ jobs:
         echo ${{ github.ref }}      
         dotnet publish unlockfps_gui --runtime win-x64 --configuration Release --output ci-publish-win64
         rm ./ci-publish-win64/*.pdb
+        rm ./ci-publish-win64/unlockfps_cli.*
 
     - name: Get tag
       uses: dawidd6/action-get-tag@v1

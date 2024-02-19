@@ -17,7 +17,7 @@
         <Label>
             <TextBlock>
                 <Run Text="Current Path:"></Run>
-                <Run Text="{Binding Config.GamePath,FallbackValue=undefined}"></Run>
+                <Run Text="{Binding Config.LaunchOptions.GamePath,FallbackValue=undefined}"></Run>
             </TextBlock>
         </Label>
         <Label Content="" />

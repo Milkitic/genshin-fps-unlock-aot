@@ -58,7 +58,7 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
         private set
         {
             _context = value;
-            IsRunning = value != null;
+            IsRunning = value is { IsFpsApplied: true };
         }
     }
 
@@ -201,6 +201,7 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
             Task.Factory.StartNew(() =>
             {
                 processContext.IsFpsApplied = true;
+                IsRunning = true;
                 ApplyFpsLoop(processContext.CancellationTokenSource.Token);
                 Context?.Dispose();
             }, TaskCreationOptions.LongRunning);

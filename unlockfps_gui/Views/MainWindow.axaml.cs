@@ -13,11 +13,10 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
-using UnlockFps.Gui.Model;
-using UnlockFps.Gui.Services;
 using UnlockFps.Gui.Utils;
 using UnlockFps.Gui.ViewModels;
 using UnlockFps.Gui.Views;
+using UnlockFps.Services;
 
 namespace UnlockFps.Gui.ViewModels
 {
@@ -25,9 +24,10 @@ namespace UnlockFps.Gui.ViewModels
     {
         public required ProcessService ProcessService { get; init; }
         public required Config Config { get; init; }
+        public required GameInstanceService GameInstanceService { get; init; }
+
         public int MinimumFps { get; set; } = 1;
         public int MaximumFps { get; set; } = 420;
-        public string? PreparingLog { get; set; }
 
         public ICommand OpenInitializationWindowCommand { get; } =
             ReactiveCommand.CreateFromTask(ShowWindow<InitializationWindow>);
@@ -64,18 +64,20 @@ namespace UnlockFps.Gui.Views
         }
 #endif
 
-        public MainWindow(ConfigService configService, ProcessService processService)
+        public MainWindow(ConfigService configService, ProcessService processService, GameInstanceService gameInstanceService)
         {
             this.SetSystemChrome();
             DataContext = _viewModel = new MainWindowViewModel()
             {
                 Config = configService.Config,
                 ProcessService = processService,
+                GameInstanceService = gameInstanceService
             };
             _configService = configService;
             _processService = processService;
             InitializeComponent();
 
+            gameInstanceService.Start();
             if (WineHelper.DetectWine(out var version, out var buildId))
             {
                 Title += $" (Wine {version})";
@@ -117,7 +119,7 @@ namespace UnlockFps.Gui.Views
             {
                 this.Hide();
                 _trayIcon.IsVisible = true;
-                _trayIcon.ToolTipText = $"{Title} (FPS: {_viewModel.Config.FPSTarget})";
+                _trayIcon.ToolTipText = $"{Title} (FPS: {_viewModel.Config.FpsTarget})";
             }
             else
             {
@@ -140,7 +142,7 @@ namespace UnlockFps.Gui.Views
                 });
             }
 
-            if (_viewModel.Config.AutoStart)
+            if (_viewModel.Config.AutoLaunch)
             {
                 await LaunchGame(true);
             }
@@ -170,47 +172,45 @@ namespace UnlockFps.Gui.Views
 
         private async Task LaunchGame(bool isAutoStart)
         {
-            if (!File.Exists(_viewModel.Config.GamePath))
+            if (!File.Exists(_viewModel.Config.LaunchOptions.GamePath))
             {
                 if (isAutoStart) return;
                 await MainWindowViewModel.ShowWindow<InitializationWindow>();
             }
 
-            if (!File.Exists(_viewModel.Config.GamePath)) return;
+            if (!File.Exists(_viewModel.Config.LaunchOptions.GamePath)) return;
 
             try
             {
-                await _processService.StartAsync((message, isError) =>
-                {
-                    _viewModel.PreparingLog = message;
-                    if (isError)
-                        Console.Error.WriteLine(message);
-                    else
-                        Console.WriteLine(message);
-                });
-                _viewModel.ProcessService.PropertyChanged += ProcessServiceOnPropertyChanged;
-                _viewModel.PreparingLog = null;
+                _processService.Start();
+                _viewModel.GameInstanceService.PropertyChanged += ProcessServiceOnPropertyChanged;
                 WindowState = WindowState.Minimized;
             }
             catch (Exception ex)
             {
                 await ShowErrorMessage(ex.Message);
-                _viewModel.PreparingLog = null;
             }
 
             return;
 
             void ProcessServiceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
             {
-                _viewModel.ProcessService.PropertyChanged -= ProcessServiceOnPropertyChanged;
-                if (_viewModel.Config.AutoClose)
+                if (e.PropertyName != nameof(GameInstanceService.IsRunning)) return;
+                if (!_viewModel.GameInstanceService.IsRunning)
                 {
-                    Close();
-                }
-                else
-                {
-                    Show();
-                    WindowState = WindowState.Normal;
+                    _viewModel.GameInstanceService.PropertyChanged -= ProcessServiceOnPropertyChanged;
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        if (_viewModel.Config.AutoClose)
+                        {
+                            Close();
+                        }
+                        else
+                        {
+                            Show();
+                            WindowState = WindowState.Normal;
+                        }
+                    });
                 }
             }
         }

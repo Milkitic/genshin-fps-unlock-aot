@@ -7,10 +7,9 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
-using UnlockFps.Gui.Model;
-using UnlockFps.Gui.Services;
 using UnlockFps.Gui.ViewModels;
 using UnlockFps.Gui.Views;
+using UnlockFps.Services;
 
 namespace UnlockFps.Gui.ViewModels
 {
@@ -53,7 +52,7 @@ namespace UnlockFps.Gui.ViewModels
                 }
                 else
                 {
-                    Config.DllList.Add(localPath);
+                    Config.LaunchOptions.DllList.Add(localPath);
                 }
             }
         });
@@ -62,7 +61,7 @@ namespace UnlockFps.Gui.ViewModels
         {
             if (SelectedDll != null)
             {
-                Config.DllList.Remove(SelectedDll);
+                Config.LaunchOptions.DllList.Remove(SelectedDll);
             }
         });
 
@@ -114,7 +113,8 @@ namespace UnlockFps.Gui.Views
             if (_configService != null)
             {
                 _configService.Config.PropertyChanged += Config_PropertyChanged;
-                _configService.Config.DllList.CollectionChanged += DllList_CollectionChanged;
+                _configService.Config.LaunchOptions.PropertyChanged += Config_PropertyChanged;
+                _configService.Config.LaunchOptions.DllList.CollectionChanged += DllList_CollectionChanged;
             }
         }
 
@@ -123,7 +123,8 @@ namespace UnlockFps.Gui.Views
             if (_configService != null)
             {
                 _configService.Config.PropertyChanged -= Config_PropertyChanged;
-                _configService.Config.DllList.CollectionChanged -= DllList_CollectionChanged;
+                _configService.Config.LaunchOptions.PropertyChanged -= Config_PropertyChanged;
+                _configService.Config.LaunchOptions.DllList.CollectionChanged -= DllList_CollectionChanged;
             }
         }
 

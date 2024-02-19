@@ -13,6 +13,7 @@
             PreferSystemTheme="True"
             PreferUserAccentColor="True"
             UseSystemFontOnWindows="True" />
+
         <StyleInclude Source="avares://unlockfps/Styles/TabStyles.axaml" />
         <Styles>
             <Style Selector="Window.tool_window Panel#PART_MinimiseButton">
@@ -39,7 +40,7 @@
             <TrayIcon
                 Icon="/Assets/icon.ico"
                 IsVisible="False"
-                ToolTipText="Avalonia Tray Icon ToolTip">
+                ToolTipText="Genshin FPS Unlocker">
                 <TrayIcon.Menu>
                     <NativeMenu>
                         <NativeMenuItem Header="_Show Panel" />
@@ -47,18 +48,6 @@
                         <NativeMenuItem Header="_Exit" />
                     </NativeMenu>
                 </TrayIcon.Menu>
-                <!-- <TrayIcon.Menu> -->
-                <!--     <NativeMenu> -->
-                <!--         <NativeMenuItem Header="Settings"> -->
-                <!--             <NativeMenu> -->
-                <!--                 <NativeMenuItem Header="Option 1" /> -->
-                <!--                 <NativeMenuItem Header="Option 2" /> -->
-                <!--                 <NativeMenuItemSeparator /> -->
-                <!--                 <NativeMenuItem Header="Option 3" /> -->
-                <!--             </NativeMenu> -->
-                <!--         </NativeMenuItem> -->
-                <!--     </NativeMenu> -->
-                <!-- </TrayIcon.Menu> -->
             </TrayIcon>
         </TrayIcons>
     </TrayIcon.Icons>

@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -13,10 +12,10 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
-using UnlockFps.Gui.Model;
-using UnlockFps.Gui.Services;
 using UnlockFps.Gui.Utils;
 using UnlockFps.Gui.ViewModels;
+using UnlockFps.Services;
+using UnlockFps.Utils;
 
 namespace UnlockFps.Gui.ViewModels
 {
@@ -53,7 +52,7 @@ namespace UnlockFps.Gui.Views
             DataContext = _viewModel = new InitializationWindowViewModel()
             {
                 Config = _configService.Config,
-                SelectedInstallationPath = configService.Config.GamePath
+                SelectedInstallationPath = configService.Config.LaunchOptions.GamePath
             };
 
             InitializeComponent();
@@ -95,7 +94,7 @@ namespace UnlockFps.Gui.Views
                     infoWindow.IsError = false;
                     infoWindow.Text = $"""
                                        Game Found!
-                                       {_configService.Config.GamePath}
+                                       {_configService.Config.LaunchOptions.GamePath}
                                        """;
                     await infoWindow.ShowDialog(this);
                     Close();
@@ -111,11 +110,8 @@ namespace UnlockFps.Gui.Views
 
             Native.EnumWindows((hWnd, lParam) =>
             {
-                const int maxCount = 256;
-                var sb = new StringBuilder(maxCount);
-
-                Native.GetClassName(hWnd, sb, maxCount);
-                if (sb.ToString() != "UnityWndClass") return true;
+                var win32Window = new Win32Window(hWnd);
+                if (win32Window.ClassName != "UnityWndClass") return true;
 
                 windowHandle = hWnd;
                 var err = Native.GetWindowThreadProcessId(hWnd, out var pid);
@@ -142,7 +138,7 @@ namespace UnlockFps.Gui.Views
             Native.TerminateProcess(processHandle, 0);
             Native.CloseHandle(processHandle);
 
-            _configService.Config.GamePath = Path.GetFullPath(processPath);
+            _configService.Config.LaunchOptions.GamePath = Path.GetFullPath(processPath);
             _configService.Save();
             return true;
         }
@@ -256,7 +252,7 @@ namespace UnlockFps.Gui.Views
             if (string.IsNullOrEmpty(selectedPath))
                 return;
 
-            _configService.Config.GamePath = selectedPath;
+            _configService.Config.LaunchOptions.GamePath = selectedPath;
             _configService.Save();
             Close();
         }
@@ -298,7 +294,7 @@ namespace UnlockFps.Gui.Views
                 return;
             }
 
-            _configService.Config.GamePath = selectedPath;
+            _configService.Config.LaunchOptions.GamePath = selectedPath;
             _configService.Save();
             Close();
         }
