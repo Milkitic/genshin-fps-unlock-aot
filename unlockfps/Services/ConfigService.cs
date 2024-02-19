@@ -67,6 +67,6 @@ public class ConfigService
     }
 }
 
-[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSourceGenerationOptions(WriteIndented = true, ReadCommentHandling = JsonCommentHandling.Skip)]
 [JsonSerializable(typeof(Config))]
 internal partial class ConfigJsonContext : JsonSerializerContext;

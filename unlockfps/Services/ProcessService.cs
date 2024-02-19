@@ -14,7 +14,7 @@ using PROCESS_INFORMATION = Windows.Win32.System.Threading.PROCESS_INFORMATION;
 namespace UnlockFps.Services;
 
 [SupportedOSPlatform("windows5.1.2600")]
-internal class ProcessService
+public class ProcessService
 {
     private static readonly ILogger Logger = LogUtils.GetLogger(nameof(ProcessService));
 

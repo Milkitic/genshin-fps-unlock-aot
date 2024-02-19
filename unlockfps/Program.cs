@@ -48,19 +48,19 @@ internal class Program
         configService.Save();
 
         using var cts = new CancellationTokenSource();
-        var fpsDaemon = new FpsDaemon(configService);
+        var gameInstanceService = new GameInstanceService(configService);
         Console.CancelKeyPress += (_, e) =>
         {
-            Exit(fpsDaemon);
+            Exit(gameInstanceService);
         };
         Logger.LogInformation("Monitor mode. Press 'Ctrl+C' to exit.");
-        fpsDaemon.Start();
+        gameInstanceService.Start();
         while (Console.ReadLine() != "exit")
         {
 
         }
 
-        Exit(fpsDaemon);
+        Exit(gameInstanceService);
     }
 
     private static async ValueTask CreateProcessWithMonitor()
@@ -69,20 +69,20 @@ internal class Program
         configService.Save();
 
         using var cts = new CancellationTokenSource();
-        var fpsDaemon = new FpsDaemon(configService);
-        fpsDaemon.Start();
+        var gameInstanceService = new GameInstanceService(configService);
+        gameInstanceService.Start();
 
         var processService = new ProcessService(configService);
         processService.Start();
 
-        fpsDaemon.ProcessExit += (p) =>
+        gameInstanceService.ProcessExit += (p) =>
         {
-            Exit(fpsDaemon);
+            Exit(gameInstanceService);
         };
         Console.CancelKeyPress += (_, e) =>
         {
             processService.KillLastProcess();
-            Exit(fpsDaemon);
+            Exit(gameInstanceService);
         };
 
 
@@ -92,12 +92,12 @@ internal class Program
         }
 
         processService.KillLastProcess();
-        Exit(fpsDaemon);
+        Exit(gameInstanceService);
     }
 
-    private static void Exit(FpsDaemon fpsDaemon)
+    private static void Exit(GameInstanceService gameInstanceService)
     {
-        fpsDaemon.Stop();
+        gameInstanceService.Stop();
         Environment.Exit(0);
     }
 }

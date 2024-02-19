@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using Milki.Extensions.Threading;
@@ -12,11 +14,11 @@ using static Windows.Win32.PInvoke;
 namespace UnlockFps.Services;
 
 [SupportedOSPlatform("windows5.0")]
-public class FpsDaemon : IDisposable
+public class GameInstanceService : IDisposable, INotifyPropertyChanged
 {
     public event Action<Process>? ProcessExit;
 
-    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(FpsDaemon));
+    private static readonly ILogger Logger = LogUtils.GetLogger(nameof(GameInstanceService));
 
     private readonly Config _config;
 
@@ -37,13 +39,29 @@ public class FpsDaemon : IDisposable
 
     private WINEVENTPROC _eventCallBack;
     private Timer _timer;
+    private bool _isRunning;
+    private ProcessContext? _context;
 
-    public FpsDaemon(ConfigService configService)
+    public GameInstanceService(ConfigService configService)
     {
         _config = configService.Config;
     }
 
-    internal ProcessContext? Context { get; private set; }
+    public bool IsRunning
+    {
+        get => _isRunning;
+        private set => SetField(ref _isRunning, value);
+    }
+
+    internal ProcessContext? Context
+    {
+        get => _context;
+        private set
+        {
+            _context = value;
+            IsRunning = value != null;
+        }
+    }
 
     // https://blog.walterlv.com/post/monitor-foreground-window-on-windows
     public void Start()
@@ -102,7 +120,7 @@ public class FpsDaemon : IDisposable
                         _synchronizationContext.Send(CallBack, win32Window);
                         lastWindow = foregroundWindow;
                     }
-                }, null, 500, 500);
+                }, null, 300, 300);
             }
         }, null);
 
@@ -379,5 +397,20 @@ public class FpsDaemon : IDisposable
             CancellationTokenSource.Dispose();
             CurrentProcess?.Dispose();
         }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }

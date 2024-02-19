@@ -33,7 +33,7 @@ public class Config : INotifyPropertyChanged
     public int FpsPowerSave { get; set; } = 10;
     public int ProcessPriority { get; set; } = 3;
     public bool ShowDebugConsole { get; set; }
-    public bool UseQueryEvent { get; set; } = true;
+    public bool WindowQueryUseEvent { get; set; } = true;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
