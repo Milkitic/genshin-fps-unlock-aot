@@ -169,54 +169,41 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Console.WriteLine("WinEventHook Callback Error:" + ex);
+            Logger.LogError(ex, "WinEventHook Callback Error");
             throw;
         }
     }
 
     private void ApplyContext(Win32Window win32Window)
     {
-        if (Context == null)
+        if (Context != null) return;
+        if (win32Window.ProcessId == 0)
         {
-            if (win32Window.ProcessId == 0)
-            {
-                Logger.LogDebug($"Invalid window: {win32Window.Handle}");
-                return;
-            }
-
-            var text =
-                $"[0x{win32Window.Handle:X16} {win32Window.ClassName}] ({win32Window.ProcessId} {win32Window.ProcessName}.exe) {win32Window.Title}";
-            var process = Process.GetProcessById((int)win32Window.ProcessId);
-            if (!CheckProcess(process, out var processContext))
-            {
-                Logger.LogDebug($"Invalid window: {text}");
-                return;
-            }
-
-            processContext.Win32Window = win32Window;
-
-            Logger.LogInformation($"Find the game window: {text}");
-            Logger.LogInformation("Start applying FPS.");
-
-            Task.Factory.StartNew(() =>
-            {
-                processContext.IsFpsApplied = true;
-                IsRunning = true;
-                ApplyFpsLoop(processContext.CancellationTokenSource.Token);
-                Context?.Dispose();
-            }, TaskCreationOptions.LongRunning);
+            Logger.LogDebug($"Invalid window: {win32Window.Handle}");
+            return;
         }
-        else
+
+        var text =
+            $"[0x{win32Window.Handle:X16} {win32Window.ClassName}] ({win32Window.ProcessId} {win32Window.ProcessName}.exe) {win32Window.Title}";
+        var process = Process.GetProcessById((int)win32Window.ProcessId);
+        if (!CheckProcess(process, out var processContext))
         {
-            Context.IsGameInForeground = Context.CurrentProcess.Id == win32Window.ProcessId;
-
-            if (_config.UsePowerSave)
-            {
-                Context.CurrentProcess.PriorityClass = Context.IsGameInForeground
-                    ? PriorityClass[_config.ProcessPriority]
-                    : ProcessPriorityClass.Idle;
-            }
+            Logger.LogDebug($"Invalid window: {text}");
+            return;
         }
+
+        processContext.Win32Window = win32Window;
+
+        Logger.LogInformation($"Find the game window: {text}");
+        Logger.LogInformation("Start applying FPS.");
+
+        Task.Factory.StartNew(() =>
+        {
+            processContext.IsFpsApplied = true;
+            IsRunning = true;
+            ApplyFpsLoop(processContext.CancellationTokenSource.Token);
+            Context?.Dispose();
+        }, TaskCreationOptions.LongRunning);
     }
 
     private void ApplyFpsLoop(CancellationToken token)
@@ -339,8 +326,23 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
 
     private void ApplyFpsLimit(ProcessContext context)
     {
+        var isGameForegroundOld = context.IsGameInForeground;
+        context.IsGameInForeground = GetForegroundWindow() == context.CurrentProcess.MainWindowHandle;
+        if (context.IsGameInForeground != isGameForegroundOld)
+        {
+            var activeStr = context.IsGameInForeground ? "active" : "inactive";
+            Logger.LogInformation($"Game window is now {activeStr}.");
+        }
+
+        if (_config.UsePowerSave)
+        {
+            context.CurrentProcess.PriorityClass = context.IsGameInForeground
+                ? PriorityClass[_config.ProcessPriority]
+                : ProcessPriorityClass.Idle;
+        }
+
         int fpsTarget;
-        if (GetForegroundWindow() == context.CurrentProcess.MainWindowHandle)
+        if (context.IsGameInForeground)
         {
             fpsTarget = _config.FpsTarget;
         }
@@ -367,6 +369,21 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
     public void Dispose()
     {
         Stop();
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 
     internal class ProcessContext : IDisposable
@@ -397,20 +414,5 @@ public class GameInstanceService : IDisposable, INotifyPropertyChanged
             CancellationTokenSource.Dispose();
             CurrentProcess?.Dispose();
         }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

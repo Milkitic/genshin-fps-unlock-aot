@@ -4,8 +4,6 @@ namespace UnlockFps.Logging;
 
 public class ConsoleLogger(string name) : ILogger
 {
-    private readonly string _name = name;
-
     private static readonly SynchronizationContext LoggerSynchronizationContext =
         new SingleSynchronizationContext("Default ConsoleLogger");
 
@@ -65,7 +63,7 @@ public class ConsoleLogger(string name) : ILogger
                 Console.Write("CRITICAL ");
             }
 
-            Console.Write($"{_name}: ");
+            Console.Write($"{name}: ");
             Console.WriteLine(message);
             Console.ResetColor();
         }, null);

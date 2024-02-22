@@ -1,10 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using UnlockFps.Logging;
 
 namespace UnlockFps.Utils;
 
 internal static partial class WineHelper
 {
+    private static readonly ILogger Logger = LogManager.GetLogger(nameof(WineHelper));
+
     public static bool DetectWine(
         [NotNullWhen(true)] out string? version,
         [NotNullWhen(true)] out string? buildId)
@@ -12,9 +15,9 @@ internal static partial class WineHelper
         try
         {
             version = GetVersion();
-            Console.WriteLine("Wine version: " + version);
+            Logger.LogInformation($"Wine version: {version}");
             buildId = GetBuildId();
-            Console.WriteLine("Wine build id: " + buildId);
+            Logger.LogInformation($"Wine build id: {buildId}");
             return true;
         }
         catch (EntryPointNotFoundException)
